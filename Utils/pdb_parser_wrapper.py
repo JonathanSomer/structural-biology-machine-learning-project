@@ -6,6 +6,12 @@ class PDBParserWrapper():
     def __init__(self):
         self._parser = PDBParser()
 
+class PatchDockResultComplexStructure(object):
+
+    def __init__(self, receptor_struct, ligand_struct):
+        self.receptor_struct = receptor_struct
+        self.ligand_struct = ligand_struct
+
 class PatchDockResultsParser(PDBParserWrapper):
 
     def get_structure(self, receptor_pdb_id, ligand_pdb_id, rank):
