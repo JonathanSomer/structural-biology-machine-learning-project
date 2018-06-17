@@ -15,6 +15,7 @@ class PatchDockResultComplexStructure(object):
 class PatchDockResultsParser(PDBParserWrapper):
 
     def get_structure(self, receptor_pdb_id, ligand_pdb_id, rank):
+
         pdb_path = file_paths.patchDock_result_path_format.format(receptor_pdb_id, ligand_pdb_id, rank)
         pdb_id = "{}-{}-PatchDockResult{}".format(receptor_pdb_id, ligand_pdb_id, rank)
         return self._parser.get_structure(pdb_id, pdb_path)
