@@ -1,6 +1,6 @@
 from Bio.PDB import PDBParser
 from Constants import FilePaths
-from objects.patch_dock_results_complex_structure import PatchDockResultComplexStructure
+from objects.patch_dock_results_complex_structure import *
 
 class PDBParserWrapper():
 
@@ -8,7 +8,7 @@ class PDBParserWrapper():
         self._parser = PDBParser()
 
     def get_structure(self, id, file):
-        return self._parser.get_structure(id, file)
+        return StructureWrapper(self._parser.get_structure(id, file))
 
     def get_result_complex_structure(self, receptor_pdb_id, ligand_pdb_id, rank):
         receptor_path = FilePaths.get_patch_dock_result_receptor_path(receptor_pdb_id, ligand_pdb_id, rank)

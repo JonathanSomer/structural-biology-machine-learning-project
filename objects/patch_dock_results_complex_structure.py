@@ -38,8 +38,8 @@ class PatchDockResultComplexStructure(object):
         return receptor_ligand_neighbors_col
 
     def _is_neighbors_are_from_different_protein(self, neighborA, neighborB):
-        neighborA_prot_id, neighborB_prot_id = neighborA.full_id[0], neighborB.full_id[0]
-        is_neighborA_is_prot_res = neighborA.id[0] == ' '
+        neighborA_prot_id, neighborB_prot_id = neighborA.full_id[0], neighborB.full_id[0] #full_id[0] == protein id
+        is_neighborA_is_prot_res = neighborA.id[0] == ' ' #id[0] == ' ' iff atom is from protein, else from glucose, water..
         is_neighborB_is_prot_res = neighborB.id[0] == ' '
         if neighborA_prot_id != neighborB_prot_id and is_neighborA_is_prot_res and is_neighborB_is_prot_res:
             return True

@@ -1,7 +1,5 @@
 from Constants import FilePaths
 
-
-
 def split_patchdock_result_complex(receptor_pdb_id, ligand_pdb_id, rank):
     org_file_path = FilePaths.get_patch_dock_result_path(receptor_pdb_id, ligand_pdb_id, rank)
     receptor_file_path = FilePaths.get_patch_dock_result_receptor_path(receptor_pdb_id, ligand_pdb_id, rank)
@@ -26,3 +24,4 @@ def split_all_patchdock_results(receptor_pdb_id, ligand_pdb_id, num_of_results):
         split_patchdock_result_complex(receptor_pdb_id, ligand_pdb_id,i)
 
 split_patchdock_result_complex("1bra", "1aap", )
+
