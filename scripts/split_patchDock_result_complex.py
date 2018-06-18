@@ -1,11 +1,11 @@
-from Constants import file_paths
+from Constants import FilePaths
 
 
 
 def split_patchdock_result_complex(receptor_pdb_id, ligand_pdb_id, rank):
-    org_file_path = file_paths.patchDock_result_path_format.format(receptor_pdb_id, ligand_pdb_id, rank)
-    receptor_file_path = file_paths.patchDock_result_receptor_path_format.format(receptor_pdb_id, ligand_pdb_id, rank)
-    ligand_file_path = file_paths.patchDock_result_ligand_path_format.format(receptor_pdb_id, ligand_pdb_id, rank)
+    org_file_path = FilePaths.get_patch_dock_result_path(receptor_pdb_id, ligand_pdb_id, rank)
+    receptor_file_path = FilePaths.get_patch_dock_result_receptor_path(receptor_pdb_id, ligand_pdb_id, rank)
+    ligand_file_path = FilePaths.get_patch_dock_result_ligand_path(receptor_pdb_id, ligand_pdb_id, rank)
     with open(org_file_path, 'r') as org_file:
         with open(receptor_file_path, 'w+') as receptor_file:
             header = org_file.readline()
