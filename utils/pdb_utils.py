@@ -17,17 +17,21 @@ def get_residue_global_id(residue):
     # type: (Residue) -> int
     """
     Gets the global index in the structure
+    returns -1 if residue is not s protein residue
     :param residue: Bio.PDB.Residue.Residue object
     :return: global id (integer)
     """
+    if not is_protein_residue(residue):
+        return -1
     struct = residue.get_parent().get_parent().get_parent()
-    global_id = residue.id[1]
-    for chain in struct.get_chains():
-        # break loop when we get to the residue's chain
-        if chain.id == residue.full_id[2]:
+    global_id = 0
+    for r in struct.get_residues():
+        if not is_protein_residue(r):
+            continue
+        # stop when we get to the residue in the structure
+        if r.full_id == residue.full_id:
             break
-
-        global_id += len([r for r in chain.get_residues() if is_protein_residue(r)])
+        global_id += 1
     return global_id
 
 
