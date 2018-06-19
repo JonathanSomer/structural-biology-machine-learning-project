@@ -1,7 +1,7 @@
 from Constants import FilePaths
 
 def split_patchdock_result_complex(receptor_pdb_id, ligand_pdb_id, rank):
-    org_file_path = FilePaths.get_patch_dock_result_path(receptor_pdb_id, ligand_pdb_id, rank)
+    org_file_path = FilePaths.get_patch_dock_raw_result_path(receptor_pdb_id, ligand_pdb_id, rank)
     receptor_file_path = FilePaths.get_patch_dock_result_receptor_path(receptor_pdb_id, ligand_pdb_id, rank)
     ligand_file_path = FilePaths.get_patch_dock_result_ligand_path(receptor_pdb_id, ligand_pdb_id, rank)
     with open(org_file_path, 'r') as org_file:

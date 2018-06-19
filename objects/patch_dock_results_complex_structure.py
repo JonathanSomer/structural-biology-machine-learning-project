@@ -1,14 +1,4 @@
 from Bio.PDB import NeighborSearch
-from Bio.PDB import PPBuilder
-
-class StructureWrapper():
-
-    def __init__(self, struct):
-        self._struct = struct
-
-    def get_sequence(self):
-        ppb = PPBuilder()
-        return ppb.build_peptides(self._struct)[0].get_sequence()
 
 class PatchDockResultComplexStructure(object):
 
@@ -39,16 +29,12 @@ class PatchDockResultComplexStructure(object):
 
     def _is_neighbors_are_from_different_protein(self, neighborA, neighborB):
         neighborA_prot_id, neighborB_prot_id = neighborA.full_id[0], neighborB.full_id[0] #full_id[0] == protein id
-        is_neighborA_is_prot_res = neighborA.id[0] == ' ' #id[0] == ' ' iff atom is from protein, else from glucose, water..
-        is_neighborB_is_prot_res = neighborB.id[0] == ' '
-        if neighborA_prot_id != neighborB_prot_id and is_neighborA_is_prot_res and is_neighborB_is_prot_res:
-            return True
-        else:
-            return False
+        is_neighborA_is_prot = neighborA.id[0] == ' ' #id[0] == ' ' iff atom is from proteinSeq, else from glucose, water..
+        is_neighborB_is_prot = neighborB.id[0] == ' '
+        return neighborA_prot_id != neighborB_prot_id and is_neighborA_is_prot and is_neighborB_is_prot
 
     def _get_receptor_ligand_col(self, neighborA, neighborB):
-        receptor_col, ligand_col = neighborA.id[1], neighborB.id[1]
-        if neighborA.full_id[0] == self.ligand_struct.id:
+        receptor_col, ligand_col = neighborA.id[1], neighborB.id[1] #id[1] == column in protein seq
+        if neighborA.full_id[0] == self.ligand_struct.id: #checks if neighborA is the ligand (residue full_id[0] == struct.id)
             receptor_col, ligand_col = ligand_col, receptor_col
         return receptor_col, ligand_col
-
