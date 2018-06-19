@@ -1,5 +1,7 @@
 from Bio.PDB import NeighborSearch
 from Bio.PDB import PPBuilder
+from utils import pdb_utils
+
 
 class StructureWrapper():
 
@@ -10,6 +12,7 @@ class StructureWrapper():
         ppb = PPBuilder()
         return ppb.build_peptides(self._struct)[0].get_sequence()
 
+
 class PatchDockResultComplexStructure(object):
 
     def __init__(self, receptor_struct, ligand_struct):
@@ -17,38 +20,32 @@ class PatchDockResultComplexStructure(object):
         self.ligand_struct = ligand_struct
 
     def get_aa_neighbors(self, radius=8):
-        all_neighbors = self._get_all_neighbors(radius)
-        return self._get_all_receptor_ligand_neighbors_col(all_neighbors)
+        # type: (self, int) -> set[tuple[int, int]]
+        """
+        Gets a set of neighboring receptor-ligand residues.
+        :param radius: radius to search for neighbors (in Angstrom)
+        :return: a set of tuples with the global ids of the receptor and ligand residues respectively
+        """
 
-    def _get_all_neighbors(self, radius):
-        all_atoms = self.get_all_atoms()
-        neighbors_search = NeighborSearch(all_atoms)
+        residue_neighbors = self._get_all_residue_neighbors(radius)
+        aa_neighbors = set()
+        for neighborA, neighborB in residue_neighbors:
+            neighborA_prot_id, neighborB_prot_id = neighborA.full_id[0], neighborB.full_id[0]
+            # skip neighbors if they come from the same protein or at least one of them is not a residue of a protein
+            if (neighborA_prot_id == neighborB_prot_id
+                    or not pdb_utils.is_protein_residue(neighborA)
+                    or not pdb_utils.is_protein_residue(neighborB)):
+                continue
+            # swap neighbors if the first is from the ligand
+            if neighborA_prot_id == self.ligand_struct.id:
+                neighborA, neighborB = neighborB, neighborA
+            aa_neighbors.add((pdb_utils.get_residue_global_id(neighborA), pdb_utils.get_residue_global_id(neighborB)))
+        return aa_neighbors
+
+    def _get_all_residue_neighbors(self, radius):
+        atoms = self.get_all_atoms()
+        neighbors_search = NeighborSearch(atoms)
         return neighbors_search.search_all(radius, level='R')
 
     def get_all_atoms(self):
-        return [atom for atom in self.receptor_struct.get_atoms()] + \
-               [atom for atom in self.ligand_struct.get_atoms()]
-
-    def _get_all_receptor_ligand_neighbors_col(self, all_neighbors):
-        receptor_ligand_neighbors_col = set()
-        for neighborA, neighborB in all_neighbors:
-            if self._is_neighbors_are_from_different_protein(neighborA, neighborB):
-                receptor_col, ligand_col = self._get_receptor_ligand_col(neighborA, neighborB)
-                receptor_ligand_neighbors_col.add((receptor_col, ligand_col))
-        return receptor_ligand_neighbors_col
-
-    def _is_neighbors_are_from_different_protein(self, neighborA, neighborB):
-        neighborA_prot_id, neighborB_prot_id = neighborA.full_id[0], neighborB.full_id[0] #full_id[0] == protein id
-        is_neighborA_is_prot_res = neighborA.id[0] == ' ' #id[0] == ' ' iff atom is from protein, else from glucose, water..
-        is_neighborB_is_prot_res = neighborB.id[0] == ' '
-        if neighborA_prot_id != neighborB_prot_id and is_neighborA_is_prot_res and is_neighborB_is_prot_res:
-            return True
-        else:
-            return False
-
-    def _get_receptor_ligand_col(self, neighborA, neighborB):
-        receptor_col, ligand_col = neighborA.id[1], neighborB.id[1]
-        if neighborA.full_id[0] == self.ligand_struct.id:
-            receptor_col, ligand_col = ligand_col, receptor_col
-        return receptor_col, ligand_col
-
+        return list(self.receptor_struct.get_atoms()) + list(self.ligand_struct.get_atoms())
