@@ -39,4 +39,4 @@ def get_structure_sequence(struct):
     :return: struct sequence
     """
     ppb = PPBuilder()
-    return ''.join([pp.get_sequence() for pp in ppb.build_peptides(struct)])
+    return ''.join([str(pp.get_sequence()) for pp in ppb.build_peptides(struct)])
