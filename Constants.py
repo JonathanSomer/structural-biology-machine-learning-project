@@ -4,7 +4,7 @@ project_dir = os.path.dirname(os.path.abspath(__file__))
 
 class FilePaths(object):
 
-    BASE_DATA_PATH = r"data\{}-{}"
+    BASE_DATA_PATH = os.path.join(project_dir, r"data", r"{}-{}")
     PATCHDOCK_RESULTS_DIR_PATH_FORMAT = os.path.join(BASE_DATA_PATH, r"patch_dock_results")
     PATCHDOCK_RAW_RESULT_PATH_FORMAT = os.path.join(PATCHDOCK_RESULTS_DIR_PATH_FORMAT, r"raw_results", r"docking.res.{}.pdb")
     PATCHDOCK_RESULT_RECEPTOR_PATH_FORMAT = os.path.join(PATCHDOCK_RESULTS_DIR_PATH_FORMAT, r"splitted_results", r"docking.res.{}.receptor.pdb")
