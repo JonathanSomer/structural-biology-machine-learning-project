@@ -1,6 +1,6 @@
 from Bio.PDB import PDBParser
 from Constants import FilePaths
-from objects.patch_dock_results_complex_structure import *
+from objects.complex import *
 
 class PDBParserWrapper():
 
@@ -20,7 +20,7 @@ class PDBParserWrapper():
 
     def get_known_comlex_structure(self, id, receptor_pdb_id, ligand_pdb_id):
         path = FilePaths.get_known_comlex_pdb_path(receptor_pdb_id, ligand_pdb_id)
-        return self.get_structure_by_file_path(id, path)
+        return KnownComplex(self.get_structure_by_file_path(id, path))
 
     def get_patch_dock_result_complex_structure(self, receptor_pdb_id, ligand_pdb_id, rank):
         receptor_path = FilePaths.get_patch_dock_result_receptor_path(receptor_pdb_id, ligand_pdb_id, rank)
