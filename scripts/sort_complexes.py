@@ -2,8 +2,8 @@ from utils.pdb_parser_wrapper import PDBParserWrapper
 from utils.pdb_utils import get_rmsd_of_super_imposed_complex
 
 num_of_complexes = 100
-receptor = "5cha"
-ligand = "2ovo"
+receptor = "1bra"
+ligand = "1aap"
 
 parser = PDBParserWrapper()
 known = parser.get_known_complex_structure(receptor, ligand)
