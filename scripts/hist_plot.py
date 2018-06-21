@@ -4,10 +4,9 @@ from matplotlib import pyplot as plt
 
 
 parser = PDBParserWrapper()
-struct = parser.get_patch_dock_result_complex_structure("1bra", "1aap", 1)
+struct = parser.get_patch_dock_result_complex_structure("1bra", "1aap", 66)
 
 raptorx_mat = get_matrix_from_raptorx("1bra", "1aap")
-
 neighbors = struct.get_aa_neighbors(radius=8)
 
 neighbors_score = []

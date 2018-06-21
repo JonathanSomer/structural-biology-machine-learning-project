@@ -76,7 +76,8 @@ def _align_residues_atom_lsts(residue1, residue2):
     residue2_atoms_aligned = []
     if residue1.resname != residue2.resname:
         raise PDBConstructionException("""expected residues to be of same AA. 
-                                       Got {} and {}""".format(residue1.resname, residue2.resname))
+                                       Got {} on {} and {} on {}""".format(residue1.resname, residue1.id[1],
+                                                                           residue2.resname, residue2.id[1]))
     for a1 in residue1:
         for a2 in residue2:
             if a1.fullname == a2.fullname:

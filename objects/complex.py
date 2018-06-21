@@ -43,7 +43,7 @@ class PatchDockResultComplexStructure(AbstractComplex):
         :param radius: radius to search for neighbors (in Angstrom)
         :return: a set of tuples with the global ids of the receptor and ligand residues respectively
         """
-        residue_neighbors = self._get_all_residue_neighbors(radius)
+        residue_neighbors = self.get_all_residue_neighbors(radius)
         aa_neighbors = set()
         for neighborA, neighborB in residue_neighbors:
             neighborA_prot_id, neighborB_prot_id = neighborA.full_id[0], neighborB.full_id[0]

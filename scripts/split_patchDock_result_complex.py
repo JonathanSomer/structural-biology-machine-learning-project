@@ -23,5 +23,4 @@ def split_all_patchdock_results(receptor_pdb_id, ligand_pdb_id, num_of_results):
     for i in range(1, num_of_results+1):
         split_patchdock_result_complex(receptor_pdb_id, ligand_pdb_id,i)
 
-split_all_patchdock_results("5cha", "2ovo", 100)
-
+split_all_patchdock_results("1bra", "1aap", 100)
