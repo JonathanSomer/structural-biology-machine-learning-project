@@ -1,79 +1,58 @@
 from Bio.PDB import NeighborSearch
 from Bio.PDB import PPBuilder
 from utils import pdb_utils
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
+from enum import Enum
+from Constants import *
+from utils.pdb_utils import pdb_parser
 
-class AbstractComplex(object):
+
+class ComplexType(Enum):
+    zdock_benchmark_bound = 1
+    zdock_benchmark_unbound = 2
+    patch_dock = 3
+
+
+class Complex(object):
     __metaclass__ = ABCMeta
 
-    def get_all_atoms(self):
-        raise NotImplementedError("Abstract method")
-
-    def get_residues(self):
-        raise NotImplementedError("Abstract method")
-
-    def get_all_residue_atoms(self):
-        all_atoms = self.get_all_atoms()
-        return [atom for atom in all_atoms if pdb_utils.is_protein_residue(atom.get_parent())]
+    @abstractmethod
+    def _init_complex(self):
+        pass
 
 
-class KnownComplex(AbstractComplex):
+class BenchmarkComplex(Complex):
+    def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound):
+        self.complex_id = complex_id
+        self.type = type
 
-    def __init__(self, struct):
-        self._struct = struct
+        self.ligand, self.receptor = self._init_complex()
 
-    def get_all_atoms(self):
-        return list(self._struct.get_atoms())
+    def _init_complex(self):
+        bound = self.type == ComplexType.zdock_benchmark_bound
+        ligand_pdb_file_path = get_zdock_benchmark_pdb_path(self.complex_id, ligand=True, bound=bound)
+        receptor_pdb_file_path = get_zdock_benchmark_pdb_path(self.complex_id, ligand=False, bound=bound)
+        ligand = pdb_parser.get_structure_by_file_path(self.complex_id, ligand_pdb_file_path)
+        receptor = pdb_parser.get_structure_by_file_path(self.complex_id, receptor_pdb_file_path)
+        return ligand, receptor
 
-    def get_residues(self):
-        for residue in self._struct.get_residues():
-            if pdb_utils.is_protein_residue(residue):
-                yield residue
 
-class PatchDockResultComplexStructure(AbstractComplex):
+class PatchDockComplex(Complex):
+    def __init__(self, complex_id, rank, ligand_chains, receptor_chains):
+        self.complex_id = complex_id
+        self.ligand_chains, self.receptor_chains = ligand_chains, receptor_chains
+        self.original_rank = rank
+        self.type = ComplexType.patch_dock
 
-    def __init__(self, receptor_struct, ligand_struct):
-        self.receptor_struct = receptor_struct
-        self.ligand_struct = ligand_struct
+        self.ligand, self.receptor = self._init_complex()
+        self.capri_score = self.calculate_capri_score()
+        self.raptor_score = self.calculate_raptor_score()
 
-    def get_aa_neighbors(self, radius=8):
-        # type: (self, int) -> set[tuple[int, int]]
-        """
-        Gets a set of neighboring receptor-ligand residues.
-        :param radius: radius to search for neighbors (in Angstrom)
-        :return: a set of tuples with the global ids of the receptor and ligand residues respectively
-        """
-        residue_neighbors = self.get_all_residue_neighbors(radius)
-        aa_neighbors = set()
-        for neighborA, neighborB in residue_neighbors:
-            neighborA_prot_id, neighborB_prot_id = neighborA.full_id[0], neighborB.full_id[0]
-            # skip neighbors if they come from the same protein or at least one of them is not a residue of a protein
-            if (neighborA_prot_id == neighborB_prot_id
-                    or not pdb_utils.is_protein_residue(neighborA)
-                    or not pdb_utils.is_protein_residue(neighborB)):
-                continue
-            # swap neighbors if the first is from the ligand
-            if neighborA_prot_id == self.ligand_struct.id:
-                neighborA, neighborB = neighborB, neighborA
-            aa_neighbors.add((pdb_utils.get_residue_global_id(neighborA), pdb_utils.get_residue_global_id(neighborB)))
-        return aa_neighbors
+    def _init_complex(self):
+        raise NotImplementedError("Should implement this method")
 
-    def get_all_residue_neighbors(self, radius):
-        atoms = self.get_all_atoms()
-        neighbors_search = NeighborSearch(atoms)
-        return neighbors_search.search_all(radius, level='R')
+    def calculate_capri_score(self):
+        raise NotImplementedError("Should implement this method")
 
-    def get_all_atoms(self):
-        return list(self.receptor_struct.get_atoms()) + list(self.ligand_struct.get_atoms())
-
-    def get_residues(self):
-        for receptor_residue in self.receptor_struct.get_residues():
-            if pdb_utils.is_protein_residue(receptor_residue):
-                yield receptor_residue
-        for ligand_residue in self.ligand_struct.get_residues():
-            if pdb_utils.is_protein_residue(ligand_residue):
-                yield ligand_residue
-
-     #todo
-    def distance_from_known_complex(self):
-        None
+    def calculate_raptor_score(self):
+        raise NotImplementedError("Should implement this method")

@@ -4,6 +4,11 @@ from Bio.PDB.Structure import Structure
 from Bio.PDB.Superimposer import Superimposer
 from Bio.PDB.PDBExceptions import PDBConstructionException
 
+from utils.pdb_parser_wrapper import PDBParserWrapper
+
+pdb_parser = PDBParserWrapper()
+
+
 def is_protein_residue(residue):
     # type: (Residue) -> bool
     """
@@ -46,6 +51,7 @@ def get_structure_sequence(struct):
     ppb = PPBuilder()
     return ''.join([str(pp.get_sequence()) for pp in ppb.build_peptides(struct)])
 
+
 def get_rmsd_of_super_imposed_complex(complex1, complex2):
     super_imposer = Superimposer()
     complex1_atom_list, complex2_atom_list = align_complexes_atoms_lsts(complex1, complex2)
@@ -61,11 +67,12 @@ def align_complexes_atoms_lsts(complex1, complex2):
     complex1_atoms_aligned = []
     complex2_atoms_aligned = []
     for residue1, residue2 in zip(complex1.get_residues(),
-                                        complex2.get_residues()):
+                                  complex2.get_residues()):
         residue1_atoms_aligned, residue2_atoms_aligned = _align_residues_atom_lsts(residue1, residue2)
         complex1_atoms_aligned += residue1_atoms_aligned
         complex2_atoms_aligned += residue2_atoms_aligned
     return complex1_atoms_aligned, complex2_atoms_aligned
+
 
 def _align_residues_atom_lsts(residue1, residue2):
     """
