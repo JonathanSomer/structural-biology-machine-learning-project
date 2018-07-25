@@ -15,3 +15,6 @@ def get_patchdock_ranked_complex_pdb_path(complex_id, rank):
     base_path = os.path.join(BASE_DATA_PATH, complex_id, "patch_dock_ranking")
     file_name = "{}.{}.pdb".format(complex_id, rank)
     return os.path.join(base_path, file_name)
+
+def get_raptorx_dir_path(complex_id):
+    return os.path.join(BASE_DATA_PATH, complex_id, "raptorx_results")

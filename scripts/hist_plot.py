@@ -1,5 +1,6 @@
+# CURRENTLY BROKEN!!!!
 from utils.pdb_parser_wrapper import PDBParserWrapper
-from utils.raptorx_parser import get_matrix_from_raptorx
+# from utils.raptorx_parser import get_matrix_from_raptorx
 from matplotlib import pyplot as plt
 
 receptor = "1bra"
@@ -9,7 +10,7 @@ rank = 66
 parser = PDBParserWrapper()
 struct = parser.get_patch_dock_result_complex_structure(receptor, ligand, 66)
 
-raptorx_mat = get_matrix_from_raptorx(receptor, ligand)
+raptorx_mat = None  # get_matrix_from_raptorx(receptor, ligand)
 neighbors = struct.get_aa_neighbors(radius=8)
 
 neighbors_score = []
