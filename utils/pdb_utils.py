@@ -1,12 +1,10 @@
-from Bio.PDB import PPBuilder
+from Bio.PDB import PDBParser, PPBuilder
 from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Superimposer import Superimposer
 from Bio.PDB.PDBExceptions import PDBConstructionException
 
-from utils.pdb_parser_wrapper import PDBParserWrapper
-
-pdb_parser = PDBParserWrapper()
+pdb_parser = PDBParser()
 
 
 def is_protein_residue(residue):

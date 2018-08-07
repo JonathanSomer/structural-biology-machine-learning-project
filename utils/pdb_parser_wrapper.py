@@ -1,3 +1,5 @@
+# comment out old code
+'''
 from Bio.PDB import PDBParser
 from Constants import FilePaths
 from objects.complex import *
@@ -17,3 +19,4 @@ class PDBParserWrapper():
     def get_ligand_structure(self, id, receptor_pdb_id, ligand_pdb_id):
         path = FilePaths.get_ligand_pdb_path(receptor_pdb_id, ligand_pdb_id)
         return self.get_structure_by_file_path(id, path)
+'''

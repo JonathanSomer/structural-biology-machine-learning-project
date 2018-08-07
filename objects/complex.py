@@ -52,8 +52,8 @@ class BenchmarkComplex(Complex):
         bound = self.type == ComplexType.zdock_benchmark_bound
         ligand_pdb_file_path = get_zdock_benchmark_pdb_path(self.complex_id, ligand=True, bound=bound)
         receptor_pdb_file_path = get_zdock_benchmark_pdb_path(self.complex_id, ligand=False, bound=bound)
-        ligand = pdb_parser.get_structure_by_file_path(self.complex_id, ligand_pdb_file_path)
-        receptor = pdb_parser.get_structure_by_file_path(self.complex_id, receptor_pdb_file_path)
+        ligand = pdb_parser.get_structure(self.complex_id, ligand_pdb_file_path)
+        receptor = pdb_parser.get_structure(self.complex_id, receptor_pdb_file_path)
         return ligand, receptor
 
     def get_neighbouring_residues(self):

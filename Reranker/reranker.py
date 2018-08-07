@@ -27,5 +27,5 @@ def raptorx_reranker(complexes, scoring_method, prob_trim=0.2):
         neighbours = res_complex.get_neighbouring_residues()
         score = raptorx_utils.get_raptorx_score(rapt_mat, neighbours, scoring_method, prob_trim)
         ranks.append((i, score))
-    sorted(ranks)
+    sorted(ranks, key=lambda rank: rank[1])
     return [complexes[i] for i, score in ranks]
