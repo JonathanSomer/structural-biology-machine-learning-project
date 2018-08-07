@@ -46,14 +46,14 @@ def get_raptorx_matrix(complex_id, filepath=None, desired_shape=None):
     return raptorx_mat
 
 
-def get_raptorx_score(raptorx_mat, neighbour_indices, method, trim=0.2):
+def get_raptorx_score(raptorx_mat, neighbour_indices, method, trim):
     # type: (np.ndarray, Iterable[Tuple[int, int]], RaptorXScoringMethod, float) -> float
     """
     Returns score based on raptorx matrix with the given score method.
     :param raptorx_mat: matrix with probabilities
     :param neighbour_indices: indices for scoring
     :param method: score method as specified by the RaptorXScoringMethod enum
-    :param trim: trim probabilies which are lower the trim value
+    :param trim: trim probabilities which are lower the trim value
     :return: interaction score
     """
     assert method not in RaptorXScoringMethod.__members__, "method is not in RaptorXScoringMethod enum"

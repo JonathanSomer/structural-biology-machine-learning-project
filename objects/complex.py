@@ -16,17 +16,37 @@ class ComplexType(Enum):
 class Complex(object):
     __metaclass__ = ABCMeta
 
+    @property
+    def complex_id(self):
+        return self._complex_id
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def receptor(self):
+        return self._receptor
+
+    @property
+    def ligand(self):
+        return self._ligand
+
     @abstractmethod
     def _init_complex(self):
+        pass
+
+    @abstractmethod
+    def get_neighbouring_residues(self):
         pass
 
 
 class BenchmarkComplex(Complex):
     def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound):
-        self.complex_id = complex_id
-        self.type = type
+        self._complex_id = complex_id
+        self._type = type
 
-        self.ligand, self.receptor = self._init_complex()
+        self._ligand, self._receptor = self._init_complex()
 
     def _init_complex(self):
         bound = self.type == ComplexType.zdock_benchmark_bound
@@ -36,19 +56,25 @@ class BenchmarkComplex(Complex):
         receptor = pdb_parser.get_structure_by_file_path(self.complex_id, receptor_pdb_file_path)
         return ligand, receptor
 
+    def get_neighbouring_residues(self):
+        raise NotImplementedError("Should implement this method")
+
 
 class PatchDockComplex(Complex):
     def __init__(self, complex_id, rank, ligand_chains, receptor_chains):
-        self.complex_id = complex_id
+        self._complex_id = complex_id
+        self._type = ComplexType.patch_dock
+
         self.ligand_chains, self.receptor_chains = ligand_chains, receptor_chains
         self.original_rank = rank
-        self.type = ComplexType.patch_dock
-
-        self.ligand, self.receptor = self._init_complex()
+        self._ligand, self._receptor = self._init_complex()
         self.capri_score = self.calculate_capri_score()
         self.raptor_score = self.calculate_raptor_score()
 
     def _init_complex(self):
+        raise NotImplementedError("Should implement this method")
+
+    def get_neighbouring_residues(self):
         raise NotImplementedError("Should implement this method")
 
     def calculate_capri_score(self):
