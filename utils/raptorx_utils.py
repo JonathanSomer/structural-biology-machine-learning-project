@@ -29,9 +29,9 @@ def get_raptorx_matrix(complex_id, filepath=None, desired_shape=None):
         matrix_file_extension = '.gcnn_inter'
         filepath_list = [file_name for file_name in os.listdir(dirpath) if file_name.endswith(matrix_file_extension)]
         if len(filepath_list) == 0:
-            raise FileNotFoundError("Couldn't find any *%s file in %s" % (matrix_file_extension, dirpath))
+            raise IOError("Couldn't find any *%s file in %s" % (matrix_file_extension, dirpath))
         if len(filepath_list) > 1:
-            raise FileExistsError("More then one *%s file exists in %s" % (matrix_file_extension, dirpath))
+            raise IOError("More then one *%s file exists in %s" % (matrix_file_extension, dirpath))
         filepath = os.path.join(dirpath, filepath_list[0])
     # load raptorx matrix
     raptorx_mat = np.loadtxt(filepath, delimiter='\t')
