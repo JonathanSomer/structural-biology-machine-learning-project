@@ -1,19 +1,13 @@
 from Bio import pairwise2
 
 from utils.pdb_utils import get_structure_sequence
-from objects import complex
 
 def intersect_neighbours_between_complexes(c1, c2):
     neighbours_c1, neighbours_c2 = set(c1.get_neighbouring_residues()), set(c2.get_neighbouring_residues())
-    print(neighbours_c1)
-    print(neighbours_c2)
     receptor_map = get_joint_positions_from_structs(c1.receptor, c2.receptor)
     ligand_map = get_joint_positions_from_structs(c1.ligand, c2.ligand)
     joint_neighbors = [(i,j) for (i,j) in neighbours_c1
                        if (receptor_map.get(i, -1), ligand_map.get(j, -1)) in neighbours_c2]
-
-    print(neighbours_c1.intersection(neighbours_c2))
-    print(joint_neighbors)
     return joint_neighbors
 
 
