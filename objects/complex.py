@@ -38,13 +38,14 @@ class Complex(object):
     def _init_complex(self):
         pass
 
-    def get_neighbouring_residues(self):
+    def add_true_residue_indexes(self):
         for i, residue in enumerate(self.ligand.get_residues()):
             residue.true_index = i
 
         for i, residue in enumerate(self.receptor.get_residues()):
             residue.true_index = i
         
+    def get_neighbouring_residues(self):
         ligand_atoms = list(self.ligand.get_atoms())
         receptor_atoms = list(self.receptor.get_atoms())
 
@@ -68,12 +69,41 @@ class Complex(object):
 
         return neighbor_indexes
 
+    def get_true_and_false_indexes_of_neighbors(self):
+        ligand_atoms = list(self.ligand.get_atoms())
+        receptor_atoms = list(self.receptor.get_atoms())
+
+        nb = NeighborSearch(ligand_atoms + receptor_atoms)
+        search_results = nb.search_all(NEIHGBOR_RADIUS, level='R')
+        
+        neighbor_indexes = []
+
+        for residue_1, residue_2 in search_results:
+            type_1, type_2 = residue_1.get_full_id()[0], residue_2.get_full_id()[0]
+            
+            if type_1 == type_2:
+                continue
+
+            if type_1 == 'ligand':
+                receptor_residue, ligand_residue = residue_2, residue_1
+            else:
+                receptor_residue, ligand_residue = residue_1, residue_2
+
+            neighbor_indexes.append({"true_receptor_index" : receptor_residue.true_index, 
+                                     "false_receptor_index" :  receptor_residue.get_id()[1], 
+                                     "true_ligand_index" : ligand_residue.true_index, 
+                                     "false_ligand_index" :  ligand_residue.get_id()[1]})
+
+        return neighbor_indexes
+
+
 class BenchmarkComplex(Complex):
     def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound):
         self._complex_id = complex_id
         self._type = type
 
         self._ligand, self._receptor = self._init_complex()
+        self.add_true_residue_indexes()
 
     def _init_complex(self):
         bound = self.type == ComplexType.zdock_benchmark_bound
@@ -92,7 +122,8 @@ class PatchDockComplex(Complex):
         self.ligand_chain_ids, self.receptor_chain_ids = self.get_chains()
         self.original_rank = rank
         self._ligand, self._receptor = self._init_complex()
-        # self.capri_score = self.calculate_capri_score()
+        self.add_true_residue_indexes()
+        self.capri_score = self.calculate_capri_score()
         # self.raptor_score = self.calculate_raptor_score()
 
     def get_chains(self):
