@@ -39,6 +39,12 @@ class Complex(object):
         pass
 
     def get_neighbouring_residues(self):
+        for i, residue in enumerate(self.ligand.get_residues()):
+            residue.true_index = i
+
+        for i, residue in enumerate(self.receptor.get_residues()):
+            residue.true_index = i
+        
         ligand_atoms = list(self.ligand.get_atoms())
         receptor_atoms = list(self.receptor.get_atoms())
 
@@ -58,7 +64,7 @@ class Complex(object):
             else:
                 receptor_residue, ligand_residue = residue_1, residue_2
 
-            neighbor_indexes.append((receptor_residue.get_id()[1], ligand_residue.get_id()[1]))
+            neighbor_indexes.append((receptor_residue.true_index, ligand_residue.true_index))
 
         return neighbor_indexes
 
