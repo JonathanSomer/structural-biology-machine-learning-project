@@ -38,7 +38,6 @@ class Complex(object):
     def _init_complex(self):
         pass
 
-    @abstractmethod
     def get_neighbouring_residues(self):
         ligand_atoms = list(self.ligand.get_atoms())
         receptor_atoms = list(self.receptor.get_atoms())
