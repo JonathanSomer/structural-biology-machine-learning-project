@@ -51,7 +51,7 @@ def get_raptorx_score(raptorx_mat, neighbour_indices, method, trim):
     """
     Returns score based on raptorx matrix with the given score method.
     :param raptorx_mat: matrix with probabilities
-    :param neighbour_indices: indices for scoring
+    :param neighbour_indices: <receptor_index, ligand_index> indices for scoring
     :param method: score method as specified by the RaptorXScoringMethod enum
     :param trim: trim probabilities which are lower the trim value
     :return: interaction score
