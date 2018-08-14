@@ -1,7 +1,7 @@
 from Bio import pairwise2
 
-from utils.pdb_utils import get_joint_positions_from_structs, get_structure_sequence
-
+from utils.pdb_utils import get_structure_sequence
+from objects import complex
 
 def intersect_neighbours_between_complexes(c1, c2):
     neighbours_c1, neighbours_c2 = set(c1.get_neighbouring_residues()), set(c2.get_neighbouring_residues())
@@ -46,3 +46,5 @@ def get_joint_positions_from_alignment(align1, align2, score, begin, end):
             align2_index += 1
         i += 1
     return index_map
+
+
