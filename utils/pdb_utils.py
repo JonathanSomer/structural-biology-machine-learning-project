@@ -3,6 +3,7 @@ from Bio.PDB.Residue import Residue
 from Bio.PDB.Structure import Structure
 from Bio.PDB.Superimposer import Superimposer
 from Bio.PDB.PDBExceptions import PDBConstructionException
+from Bio import pairwise2
 
 pdb_parser = PDBParser()
 
@@ -89,3 +90,29 @@ def _align_residues_atom_lsts(residue1, residue2):
                 residue1_atoms_aligned.append(a1)
                 residue2_atoms_aligned.append(a2)
     return residue1_atoms_aligned, residue2_atoms_aligned
+
+def get_joint_positions_from_pdbs(path_to_pdb1, path_to_pdb2):
+    """get paths to two pdb files
+    return a list oa list of tuples of the identical residues.
+    """
+    alignments = pairwise2.align.globalxx(
+        get_structure_sequence(pdb_parser.get_structure("1", path_to_pdb1)),
+        get_structure_sequence(pdb_parser.get_structure("2", path_to_pdb2)))
+    return get_joint_positions_from_alignment(*alignments[0])
+
+
+def get_joint_positions_from_alignment(align1, align2, score, begin, end):
+    """format_alignment(align1, align2, score, begin, end) -> string
+    Format the alignment prettily into a list of tuples of the identical residues.
+    """
+    lst = []
+    i, align1_index, align2_index = 0, 0, 0
+    while i < len(align1):
+        if align1[i] == align2[i]:
+            lst.append((align1_index, align2_index))
+        if align1[i] != "-":
+            align1_index += 1
+        if align2[i] != "-":
+            align2_index += 1
+        i += 1
+    return lst
