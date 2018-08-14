@@ -10,7 +10,7 @@ from utils.pdb_utils import pdb_parser
 class ComplexType(Enum):
     zdock_benchmark_bound = 1
     zdock_benchmark_unbound = 2
-    patch_dock = 3
+    patch_dock = 3      
 
 
 class Complex(object):
@@ -61,18 +61,36 @@ class BenchmarkComplex(Complex):
 
 
 class PatchDockComplex(Complex):
-    def __init__(self, complex_id, rank, ligand_chains, receptor_chains):
+    def __init__(self, complex_id, rank):
         self._complex_id = complex_id
         self._type = ComplexType.patch_dock
 
-        self.ligand_chains, self.receptor_chains = ligand_chains, receptor_chains
+        self.ligand_chain_ids, self.receptor_chain_ids = self.get_chains()
         self.original_rank = rank
         self._ligand, self._receptor = self._init_complex()
-        self.capri_score = self.calculate_capri_score()
-        self.raptor_score = self.calculate_raptor_score()
+        # self.capri_score = self.calculate_capri_score()
+        # self.raptor_score = self.calculate_raptor_score()
+
+    def get_chains(self):
+        benchmark_complex = BenchmarkComplex(self._complex_id, type=ComplexType.zdock_benchmark_unbound)
+        receptor_chain_ids = [chain.get_id() for chain in list(benchmark_complex.receptor.get_chains())]
+        ligand_chain_ids = [chain.get_id() for chain in list(benchmark_complex.ligand.get_chains())]
+
+        return ligand_chain_ids, receptor_chain_ids
 
     def _init_complex(self):
-        raise NotImplementedError("Should implement this method")
+        patch_dock_complex_path = get_patchdock_ranked_complex_pdb_path(self._complex_id, self.original_rank)
+
+        patch_dock_ligand = pdb_parser.get_structure(self._complex_id, patch_dock_complex_path)
+        patch_dock_receptor = pdb_parser.get_structure(self._complex_id, patch_dock_complex_path)
+
+        for chain_id in self.receptor_chain_ids:
+            patch_dock_ligand.get_list()[0].detach_child(chain_id)
+
+        for chain_id in self.ligand_chain_ids:
+            patch_dock_receptor.get_list()[0].detach_child(chain_id)
+
+        return patch_dock_ligand, patch_dock_receptor
 
     def get_neighbouring_residues(self):
         raise NotImplementedError("Should implement this method")
