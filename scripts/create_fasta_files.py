@@ -26,7 +26,8 @@ sanity_check = False
 base_path = os.path.abspath(os.pardir)
 if sanity_check:
     print base_path
-    raise EnvironmentError('Please make sure this is the path to the root directory')
+    raise EnvironmentError('Please make sure this is the path to the root directory of the project. '
+                           'If not, you can hard code it to the base_path parameter.')
     exit()
 benchmark_path = os.path.join(base_path, 'benchmark5')
 data_path = os.path.join(base_path, 'data')
