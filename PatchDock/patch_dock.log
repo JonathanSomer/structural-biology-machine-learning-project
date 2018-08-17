@@ -1,0 +1,47 @@
+00:00:00.00| INFO: START DOCKING 1A2K_l_u.pdb with 1A2K_r_u.pdb
+00:00:00.00| INFO: Start reading PDB for receptor molecule
+00:00:00.00| INFO: Chem molecule: 1641 atoms were read
+00:00:00.00| INFO: Hydrogen molecule: 1641 atoms were read
+00:00:00.00| INFO: Start reading PDB for ligand molecule
+00:00:00.02| INFO: Chem molecule: 1979 atoms were read
+00:00:00.03| INFO: Hydrogen molecule: 1979 atoms were read
+00:00:00.07| INFO: Start building docking surface for receptor molecule
+00:00:00.07| INFO: Start building surface, molecule grid and distance function
+00:00:02.97| INFO: Start calculating Volume function and Normals for surface points
+00:00:03.06| INFO: Shuo surface size = 3968
+00:00:03.19| INFO: 3000sp processed
+00:00:03.38| INFO: Start calculating Active Site patches
+00:00:03.40| INFO: Running segmentation for KNB
+00:00:03.54| INFO: Running segmentation for FLT
+00:00:03.57| INFO: Running segmentation for HLE
+00:00:04.03| INFO: Final # of patches: 40
+00:00:04.03| INFO: Final # of patches: 27
+00:00:04.03| INFO: Start calculating Geodesical distances
+00:00:04.03| INFO: Start building docking surface for ligand molecule
+00:00:04.03| INFO: Start building surface, molecule grid and distance function
+00:00:07.50| INFO: Start calculating Volume function and Normals for surface points
+00:00:07.61| INFO: Shuo surface size = 4656
+00:00:07.73| INFO: 3000sp processed
+00:00:07.98| INFO: Start calculating Active Site patches
+00:00:08.00| INFO: Running segmentation for KNB
+00:00:08.09| INFO: Running segmentation for FLT
+00:00:08.11| INFO: Running segmentation for HLE
+00:00:08.61| INFO: Final # of patches: 48
+00:00:08.61| INFO: Final # of patches: 33
+00:00:08.61| INFO: Start calculating Geodesical distances
+00:00:08.61| INFO: Start docking
+00:00:08.61| INFO: Initializing cluster parameters
+00:00:08.61| INFO: Building scoring trees
+00:00:08.77| INFO: Pose Clustering matching algorithm (default)
+00:00:08.77| INFO: Initializing Matching Data Structure
+00:00:08.77| INFO: Initializing cluster parameters
+00:00:08.77| INFO: Start Preprocessing
+00:00:08.88| INFO: Start Docking hole-knob patches
+00:00:10.10| INFO: Start clustering 2800694 transforms
+00:00:23.21| INFO: Clustered transforms size: 58861
+00:00:29.45| INFO: Filtered transforms size: 34190
+00:00:29.64| INFO: Backbone filtered transforms size: 31666
+00:00:31.06| INFO: RMSD Clustered transforms size: 27173
+00:01:09.30| INFO: Scored transforms size: 13246
+00:01:09.31| INFO: Done processing patch # 1 out of 27
+00:01:10.23| INFO: Start clustering 2861415 transforms
