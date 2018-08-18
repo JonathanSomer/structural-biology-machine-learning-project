@@ -1,15 +1,15 @@
 ########################################################################
-#    PatchDock Parameter File for 1A2K_l_u.pdb-1A2K_r_u.pdb
+#    PatchDock Parameter File for 1NW9_r_u.pdb-1NW9_l_u.pdb
 ########################################################################
 
 #    File Names:
-receptorPdb 1A2K_l_u.pdb
-ligandPdb 1A2K_r_u.pdb
+receptorPdb 1NW9_r_u.pdb
+ligandPdb 1NW9_l_u.pdb
 #receptorActiveSite site1.txt
 #ligandActiveSite site2.txt
 #receptorBlockingSite site1.txt
 #ligandBlockingSite site2.txt
-protLib /specific/a/home/cc/students/csguests/somer/chem.lib
+protLib /home/jonathansomer/dev/structural-biology-machine-learning-project/PatchDock/chem.lib
 log-file patch_dock.log
 log-level 2
 

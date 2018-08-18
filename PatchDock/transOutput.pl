@@ -23,6 +23,8 @@ open(DATA, $resFileName);
 
 my $home = "$FindBin::Bin";
 
+print "HOME IS: $home\n";
+
 while(<DATA>) {
   chomp;
   my @tmp=split('\|',$_);
