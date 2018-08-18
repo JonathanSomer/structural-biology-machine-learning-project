@@ -123,7 +123,7 @@ class PatchDockComplex(Complex):
         self.original_rank = rank
         self._ligand, self._receptor = self._init_complex()
         self.add_true_residue_indexes()
-        self.capri_score = self.calculate_capri_score()
+        # self.capri_score = self.calculate_capri_score()
         # self.raptor_score = self.calculate_raptor_score()
 
     def get_chains(self):
@@ -147,8 +147,8 @@ class PatchDockComplex(Complex):
 
         return patch_dock_ligand, patch_dock_receptor
 
-    def calculate_capri_score(self):
-        raise NotImplementedError("Should implement this method")
+    # def calculate_capri_score(self):
+    #     raise NotImplementedError("Should implement this method")
 
-    def calculate_raptor_score(self):
-        raise NotImplementedError("Should implement this method")
+    # def calculate_raptor_score(self):
+    #     raise NotImplementedError("Should implement this method")

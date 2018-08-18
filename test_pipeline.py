@@ -1,6 +1,10 @@
 import objects.complex as complex
+import warnings
+from Bio.PDB.PDBExceptions import PDBConstructionWarning
 
-complex_id = '2B42'
+warnings.simplefilter('ignore', PDBConstructionWarning)
+
+complex_id = '1ACB'
 
 complex_bound = complex.BenchmarkComplex(complex_id)
 complex_unbound = complex.BenchmarkComplex(complex_id, complex.ComplexType.zdock_benchmark_unbound)
@@ -9,12 +13,13 @@ complex_unbound = complex.BenchmarkComplex(complex_id, complex.ComplexType.zdock
 ligand_chains, receptor_chains = None, None
 
 complex_ranking = []
-for i in range(1, 1000):
-    patch_dock_complex = complex.PatchDockComplex(complex_id, i, ligand_chains, receptor_chains)
-    complex_ranking.append(patch_dock_complex)
+for i in range(1, 200):
+	print(str(i))
+	patch_dock_complex = complex.PatchDockComplex(complex_id, i)
+	complex_ranking.append(patch_dock_complex)
 
 # simple test for capri score
-print complex_ranking[0].capri_score
+print(complex_ranking[0].capri_score)
 
 # TODO: implement score_rank using DockQ~!
 # TODO: rename score_rank for a more informative name
@@ -25,4 +30,4 @@ complex_predictions_post_raptor = raptor_rerank(complex_id, complex_ranking)
 
 overall_postraptor_score = capri_score_ranking(complex_predictions_post_raptor)
 
-print compare_score(overall_preraptor_score, overall_postraptor_score)
+print(compare_score(overall_preraptor_score, overall_postraptor_score))
