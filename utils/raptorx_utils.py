@@ -56,7 +56,7 @@ def get_raptorx_score(raptorx_mat, neighbour_indices, method, trim):
     :param trim: trim probabilities which are lower the trim value
     :return: interaction score
     """
-    assert method not in RaptorXScoringMethod.__members__, "method is not in RaptorXScoringMethod enum"
+    #assert method not in RaptorXScoringMethod.__members__, "method is not in RaptorXScoringMethod enum"
     # get new ndarray by list of incides
     neighbour_scores = raptorx_mat[tuple(zip(*neighbour_indices))]
     # trim results

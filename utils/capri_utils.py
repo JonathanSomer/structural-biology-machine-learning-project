@@ -1,21 +1,36 @@
 from enum import Enum
-import os
+from utils.fnat_utils import get_fnat_score
 
-class Rank(Enum):
-    High = 1
-    Medium = 2
-    Acceptable = 3
-    Incorrect = 4
 
-class CapriScorer(object):
-    
-    # singleton implementation:
-    _instance = None
+class CapriAcceptanceLevelScores(Enum):
+    High = 1000
+    Medium = 100
+    Acceptable = 10
+    Incorrect = 1
 
-    def __new__(_class):
-    	if CapriScorer._instance == None:
-    		CapriScorer._instance = object.__new__(CapriScorer)
-    	return CapriScorer._instance
 
-    def score():
-    	pass
+class FnatThresholds(Enum):
+    High = 0.5
+    Medium = 0.3
+    Acceptable = 0.1
+
+#this will indicate how many of the first 10 results is of each acceptance criteria
+#thousands for high, hundreds for medium, tens for acceptance, and ones for incorrect
+def get_capri_score(ranked_complexes, banchmark_complex):
+    top_10 = ranked_complexes[:10]
+    return sum(_get_capri_score_for_estimated_complex(estimated_complex, banchmark_complex)
+               for estimated_complex in top_10)
+
+def _get_capri_score_for_estimated_complex(estimated_complex, banchmark_complex):
+    fnat = get_fnat_score(estimated_complex, banchmark_complex)
+    return _get_capri_score_from_fnat(fnat)
+
+def _get_capri_score_from_fnat(fnat):
+    if fnat > FnatThresholds.High:
+        return CapriAcceptanceLevelScores.High
+    elif fnat > FnatThresholds.Medium:
+        return CapriAcceptanceLevelScores.Medium
+    elif fnat > FnatThresholds.Acceptable:
+        return CapriAcceptanceLevelScores.Acceptable
+    else:
+        return CapriAcceptanceLevelScores.Incorrect
