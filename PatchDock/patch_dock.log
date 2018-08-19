@@ -1,0 +1,575 @@
+00:00:00.00| INFO: START DOCKING 1NW9_r_u.pdb with 1NW9_l_u.pdb
+00:00:00.00| INFO: Start reading PDB for receptor molecule
+00:00:00.00| INFO: Chem molecule: 1879 atoms were read
+00:00:00.00| INFO: Hydrogen molecule: 1879 atoms were read
+00:00:00.00| INFO: Start reading PDB for ligand molecule
+00:00:00.00| INFO: Chem molecule: 815 atoms were read
+00:00:00.01| INFO: Hydrogen molecule: 815 atoms were read
+00:00:00.02| INFO: Start building docking surface for receptor molecule
+00:00:00.02| INFO: Start building surface, molecule grid and distance function
+00:00:01.78| INFO: Start calculating Volume function and Normals for surface points
+00:00:01.85| INFO: Shuo surface size = 4444
+00:00:01.89| INFO: 3000sp processed
+00:00:02.00| INFO: Start calculating Active Site patches
+00:00:02.01| INFO: Running segmentation for KNB
+00:00:02.07| INFO: Running segmentation for FLT
+00:00:02.08| INFO: Running segmentation for HLE
+00:00:02.36| INFO: Final # of patches: 44
+00:00:02.38| INFO: Final # of patches: 31
+00:00:02.38| INFO: Start calculating Geodesical distances
+00:00:02.38| INFO: Start building docking surface for ligand molecule
+00:00:02.38| INFO: Start building surface, molecule grid and distance function
+00:00:03.23| INFO: Start calculating Volume function and Normals for surface points
+00:00:03.25| INFO: Shuo surface size = 2218
+00:00:03.32| INFO: Start calculating Active Site patches
+00:00:03.33| INFO: Running segmentation for KNB
+00:00:03.34| INFO: Running segmentation for FLT
+00:00:03.35| INFO: Running segmentation for HLE
+00:00:03.42| INFO: Final # of patches: 25
+00:00:03.42| INFO: Final # of patches: 12
+00:00:03.42| INFO: Start calculating Geodesical distances
+00:00:03.42| INFO: Start docking
+00:00:03.42| INFO: Initializing cluster parameters
+00:00:03.42| INFO: Building scoring trees
+00:00:03.49| INFO: Pose Clustering matching algorithm (default)
+00:00:03.49| INFO: Initializing Matching Data Structure
+00:00:03.49| INFO: Initializing cluster parameters
+00:00:03.49| INFO: Start Preprocessing
+00:00:03.50| INFO: Start Docking hole-knob patches
+00:00:03.52| INFO: Start clustering 82576 transforms
+00:00:03.67| INFO: Clustered transforms size: 113
+00:00:03.67| INFO: Filtered transforms size: 56
+00:00:03.68| INFO: Backbone filtered transforms size: 50
+00:00:03.68| INFO: RMSD Clustered transforms size: 46
+00:00:03.73| INFO: Scored transforms size: 21
+00:00:03.73| INFO: Done processing patch # 1 out of 31
+00:00:04.19| INFO: Start clustering 1860042 transforms
+00:00:08.11| INFO: Clustered transforms size: 60410
+00:00:11.03| INFO: Filtered transforms size: 33165
+00:00:11.09| INFO: Backbone filtered transforms size: 29381
+00:00:12.68| INFO: RMSD Clustered transforms size: 18892
+00:00:29.75| INFO: Scored transforms size: 8960
+00:00:29.75| INFO: Done processing patch # 2 out of 31
+00:00:29.86| INFO: Start clustering 671595 transforms
+00:00:31.15| INFO: Clustered transforms size: 10332
+00:00:31.67| INFO: Filtered transforms size: 4691
+00:00:31.68| INFO: Backbone filtered transforms size: 4379
+00:00:31.71| INFO: RMSD Clustered transforms size: 3509
+00:00:35.84| INFO: Scored transforms size: 1395
+00:00:35.84| INFO: Done processing patch # 3 out of 31
+00:00:36.02| INFO: Start clustering 1211094 transforms
+00:00:38.63| INFO: Clustered transforms size: 19612
+00:00:39.31| INFO: Filtered transforms size: 4226
+00:00:39.31| INFO: Backbone filtered transforms size: 3901
+00:00:39.34| INFO: RMSD Clustered transforms size: 3174
+00:00:43.72| INFO: Scored transforms size: 1123
+00:00:43.72| INFO: Done processing patch # 4 out of 31
+00:00:43.95| INFO: Start clustering 1141325 transforms
+00:00:46.40| INFO: Clustered transforms size: 33941
+00:00:48.25| INFO: Filtered transforms size: 24332
+00:00:48.29| INFO: Backbone filtered transforms size: 22415
+00:00:49.18| INFO: RMSD Clustered transforms size: 15286
+00:01:02.61| INFO: Scored transforms size: 9001
+00:01:02.61| INFO: Done processing patch # 5 out of 31
+00:01:02.79| INFO: Start clustering 1244924 transforms
+00:01:05.45| INFO: Clustered transforms size: 26460
+00:01:06.98| INFO: Filtered transforms size: 18326
+00:01:07.01| INFO: Backbone filtered transforms size: 17719
+00:01:07.41| INFO: RMSD Clustered transforms size: 13061
+00:01:19.80| INFO: Scored transforms size: 6872
+00:01:19.81| INFO: Done processing patch # 6 out of 31
+00:01:19.95| INFO: Start clustering 928377 transforms
+00:01:21.91| INFO: Clustered transforms size: 19897
+00:01:22.84| INFO: Filtered transforms size: 10269
+00:01:22.87| INFO: Backbone filtered transforms size: 9804
+00:01:23.05| INFO: RMSD Clustered transforms size: 7200
+00:01:33.40| INFO: Scored transforms size: 3580
+00:01:33.40| INFO: Done processing patch # 7 out of 31
+00:01:33.54| INFO: Start clustering 822182 transforms
+00:01:35.19| INFO: Clustered transforms size: 10175
+00:01:35.58| INFO: Filtered transforms size: 2413
+00:01:35.58| INFO: Backbone filtered transforms size: 2330
+00:01:35.59| INFO: RMSD Clustered transforms size: 1952
+00:01:37.98| INFO: Scored transforms size: 862
+00:01:37.98| INFO: Done processing patch # 8 out of 31
+00:01:38.19| INFO: Start clustering 1300594 transforms
+00:01:40.90| INFO: Clustered transforms size: 35108
+00:01:42.66| INFO: Filtered transforms size: 27890
+00:01:42.69| INFO: Backbone filtered transforms size: 27444
+00:01:43.55| INFO: RMSD Clustered transforms size: 18477
+00:01:58.98| INFO: Scored transforms size: 11827
+00:01:58.98| INFO: Done processing patch # 9 out of 31
+00:01:59.13| INFO: Start clustering 1007210 transforms
+00:02:01.25| INFO: Clustered transforms size: 22071
+00:02:02.44| INFO: Filtered transforms size: 18281
+00:02:02.47| INFO: Backbone filtered transforms size: 18109
+00:02:02.97| INFO: RMSD Clustered transforms size: 13173
+00:02:13.86| INFO: Scored transforms size: 9137
+00:02:13.86| INFO: Done processing patch # 10 out of 31
+00:02:13.99| INFO: Start clustering 828302 transforms
+00:02:15.71| INFO: Clustered transforms size: 14164
+00:02:16.52| INFO: Filtered transforms size: 10066
+00:02:16.53| INFO: Backbone filtered transforms size: 9492
+00:02:16.69| INFO: RMSD Clustered transforms size: 7271
+00:02:23.82| INFO: Scored transforms size: 4299
+00:02:23.82| INFO: Done processing patch # 11 out of 31
+00:02:23.91| INFO: Start clustering 588827 transforms
+00:02:25.16| INFO: Clustered transforms size: 6698
+00:02:25.52| INFO: Filtered transforms size: 5784
+00:02:25.53| INFO: Backbone filtered transforms size: 5654
+00:02:25.63| INFO: RMSD Clustered transforms size: 4564
+00:02:28.91| INFO: Scored transforms size: 3094
+00:02:28.91| INFO: Done processing patch # 12 out of 31
+00:02:29.05| INFO: Start clustering 908216 transforms
+00:02:30.88| INFO: Clustered transforms size: 20257
+00:02:32.08| INFO: Filtered transforms size: 14865
+00:02:32.11| INFO: Backbone filtered transforms size: 14323
+00:02:32.39| INFO: RMSD Clustered transforms size: 10284
+00:02:44.52| INFO: Scored transforms size: 6429
+00:02:44.52| INFO: Done processing patch # 13 out of 31
+00:02:44.74| INFO: Start clustering 1500538 transforms
+00:02:48.33| INFO: Clustered transforms size: 35048
+00:02:50.11| INFO: Filtered transforms size: 19709
+00:02:50.14| INFO: Backbone filtered transforms size: 18718
+00:02:50.69| INFO: RMSD Clustered transforms size: 13289
+00:03:10.02| INFO: Scored transforms size: 6878
+00:03:10.02| INFO: Done processing patch # 14 out of 31
+00:03:10.21| INFO: Start clustering 1140267 transforms
+00:03:12.69| INFO: Clustered transforms size: 26338
+00:03:13.99| INFO: Filtered transforms size: 17607
+00:03:14.02| INFO: Backbone filtered transforms size: 16863
+00:03:14.44| INFO: RMSD Clustered transforms size: 12245
+00:03:28.10| INFO: Scored transforms size: 7319
+00:03:28.10| INFO: Done processing patch # 15 out of 31
+00:03:28.24| INFO: Start clustering 927563 transforms
+00:03:30.24| INFO: Clustered transforms size: 19233
+00:03:31.32| INFO: Filtered transforms size: 15543
+00:03:31.36| INFO: Backbone filtered transforms size: 15283
+00:03:31.69| INFO: RMSD Clustered transforms size: 10789
+00:03:40.83| INFO: Scored transforms size: 7444
+00:03:40.85| INFO: Done processing patch # 16 out of 31
+00:03:40.91| INFO: Start clustering 306946 transforms
+00:03:41.55| INFO: Clustered transforms size: 2197
+00:03:41.69| INFO: Filtered transforms size: 1449
+00:03:41.69| INFO: Backbone filtered transforms size: 1387
+00:03:41.69| INFO: RMSD Clustered transforms size: 1212
+00:03:43.05| INFO: Scored transforms size: 802
+00:03:43.05| INFO: Done processing patch # 17 out of 31
+00:03:43.19| INFO: Start clustering 809163 transforms
+00:03:44.97| INFO: Clustered transforms size: 15723
+00:03:46.61| INFO: Filtered transforms size: 12243
+00:03:46.63| INFO: Backbone filtered transforms size: 11674
+00:03:46.82| INFO: RMSD Clustered transforms size: 8932
+00:03:55.63| INFO: Scored transforms size: 5998
+00:03:55.63| INFO: Done processing patch # 18 out of 31
+00:03:55.83| INFO: Start clustering 1077237 transforms
+00:03:58.64| INFO: Clustered transforms size: 23371
+00:04:00.02| INFO: Filtered transforms size: 15269
+00:04:00.07| INFO: Backbone filtered transforms size: 14403
+00:04:00.52| INFO: RMSD Clustered transforms size: 10729
+00:04:11.17| INFO: Scored transforms size: 6172
+00:04:11.19| INFO: Done processing patch # 19 out of 31
+00:04:11.25| INFO: Start clustering 489223 transforms
+00:04:12.27| INFO: Clustered transforms size: 5985
+00:04:12.58| INFO: Filtered transforms size: 3124
+00:04:12.58| INFO: Backbone filtered transforms size: 2977
+00:04:12.61| INFO: RMSD Clustered transforms size: 2313
+00:04:15.88| INFO: Scored transforms size: 1207
+00:04:15.89| INFO: Done processing patch # 20 out of 31
+00:04:16.13| INFO: Start clustering 934763 transforms
+00:04:18.33| INFO: Clustered transforms size: 18835
+00:04:19.16| INFO: Filtered transforms size: 6062
+00:04:19.17| INFO: Backbone filtered transforms size: 5762
+00:04:19.26| INFO: RMSD Clustered transforms size: 4560
+00:04:24.04| INFO: Scored transforms size: 1985
+00:04:24.05| INFO: Done processing patch # 21 out of 31
+00:04:24.16| INFO: Start clustering 698043 transforms
+00:04:25.55| INFO: Clustered transforms size: 11618
+00:04:26.20| INFO: Filtered transforms size: 7628
+00:04:26.23| INFO: Backbone filtered transforms size: 7248
+00:04:26.33| INFO: RMSD Clustered transforms size: 5662
+00:04:32.92| INFO: Scored transforms size: 3436
+00:04:32.92| INFO: Done processing patch # 22 out of 31
+00:04:33.02| INFO: Start clustering 442285 transforms
+00:04:33.89| INFO: Clustered transforms size: 3112
+00:04:34.16| INFO: Filtered transforms size: 2397
+00:04:34.16| INFO: Backbone filtered transforms size: 2249
+00:04:34.17| INFO: RMSD Clustered transforms size: 1887
+00:04:36.57| INFO: Scored transforms size: 1179
+00:04:36.57| INFO: Done processing patch # 23 out of 31
+00:04:36.67| INFO: Start clustering 500947 transforms
+00:04:37.67| INFO: Clustered transforms size: 6012
+00:04:38.02| INFO: Filtered transforms size: 4183
+00:04:38.04| INFO: Backbone filtered transforms size: 3915
+00:04:38.07| INFO: RMSD Clustered transforms size: 3089
+00:04:42.01| INFO: Scored transforms size: 1883
+00:04:42.01| INFO: Done processing patch # 24 out of 31
+00:04:42.16| INFO: Start clustering 868217 transforms
+00:04:44.11| INFO: Clustered transforms size: 16979
+00:04:45.01| INFO: Filtered transforms size: 14164
+00:04:45.04| INFO: Backbone filtered transforms size: 13865
+00:04:45.30| INFO: RMSD Clustered transforms size: 10152
+00:04:54.45| INFO: Scored transforms size: 7318
+00:04:54.47| INFO: Done processing patch # 25 out of 31
+00:04:54.64| INFO: Start clustering 953101 transforms
+00:04:56.77| INFO: Clustered transforms size: 19313
+00:04:57.91| INFO: Filtered transforms size: 12680
+00:04:57.94| INFO: Backbone filtered transforms size: 12011
+00:04:58.20| INFO: RMSD Clustered transforms size: 9063
+00:05:08.01| INFO: Scored transforms size: 5766
+00:05:08.01| INFO: Done processing patch # 26 out of 31
+00:05:08.10| INFO: Start clustering 412513 transforms
+00:05:08.88| INFO: Clustered transforms size: 2899
+00:05:09.02| INFO: Filtered transforms size: 1707
+00:05:09.02| INFO: Backbone filtered transforms size: 1575
+00:05:09.04| INFO: RMSD Clustered transforms size: 1391
+00:05:10.57| INFO: Scored transforms size: 791
+00:05:10.57| INFO: Done processing patch # 27 out of 31
+00:05:10.88| INFO: Start clustering 1617916 transforms
+00:05:15.86| INFO: Clustered transforms size: 42000
+00:05:20.07| INFO: Filtered transforms size: 32801
+00:05:20.17| INFO: Backbone filtered transforms size: 32224
+00:05:21.73| INFO: RMSD Clustered transforms size: 21541
+00:05:43.20| INFO: Scored transforms size: 14511
+00:05:43.22| INFO: Done processing patch # 28 out of 31
+00:05:43.32| INFO: Start clustering 587114 transforms
+00:05:44.60| INFO: Clustered transforms size: 8262
+00:05:45.07| INFO: Filtered transforms size: 6901
+00:05:45.08| INFO: Backbone filtered transforms size: 6738
+00:05:45.19| INFO: RMSD Clustered transforms size: 5303
+00:05:50.67| INFO: Scored transforms size: 3784
+00:05:50.67| INFO: Done processing patch # 29 out of 31
+00:05:50.82| INFO: Start clustering 842258 transforms
+00:05:52.75| INFO: Clustered transforms size: 15724
+00:05:53.79| INFO: Filtered transforms size: 11490
+00:05:53.82| INFO: Backbone filtered transforms size: 10980
+00:05:54.07| INFO: RMSD Clustered transforms size: 8097
+00:06:04.92| INFO: Scored transforms size: 5374
+00:06:04.92| INFO: Done processing patch # 30 out of 31
+00:06:04.92| INFO: Start Docking flat-flat patches
+00:06:04.92| INFO: Start Docking knob-hole patches
+00:06:06.66| INFO: Start clustering 5191176 transforms
+00:06:24.35| INFO: Clustered transforms size: 93148
+00:06:25.23| INFO: Start clustering 5129322 transforms
+00:06:39.73| INFO: Clustered transforms size: 203068
+00:06:40.67| INFO: Start clustering 5008373 transforms
+00:06:56.17| INFO: Clustered transforms size: 270299
+00:06:56.23| INFO: Start clustering 79563 transforms
+00:06:56.36| INFO: Clustered transforms size: 270414
+00:07:13.63| INFO: Filtered transforms size: 169257
+00:07:14.10| INFO: Backbone filtered transforms size: 159061
+00:07:22.89| INFO: RMSD Clustered transforms size: 103361
+00:09:27.03| INFO: Scored transforms size: 49761
+00:09:27.09| INFO: Done processing patch # 1 out of 44
+00:09:27.11| INFO: Start clustering 67621 transforms
+00:09:27.27| INFO: Clustered transforms size: 396
+00:09:27.29| INFO: Filtered transforms size: 366
+00:09:27.30| INFO: Backbone filtered transforms size: 366
+00:09:27.30| INFO: RMSD Clustered transforms size: 314
+00:09:27.57| INFO: Scored transforms size: 222
+00:09:27.57| INFO: Done processing patch # 2 out of 44
+00:09:27.63| INFO: Start clustering 287771 transforms
+00:09:28.14| INFO: Clustered transforms size: 5017
+00:09:28.46| INFO: Filtered transforms size: 3835
+00:09:28.46| INFO: Backbone filtered transforms size: 3573
+00:09:28.53| INFO: RMSD Clustered transforms size: 2636
+00:09:31.44| INFO: Scored transforms size: 1704
+00:09:31.44| INFO: Done processing patch # 3 out of 44
+00:09:31.50| INFO: Start clustering 296368 transforms
+00:09:32.03| INFO: Clustered transforms size: 5262
+00:09:32.34| INFO: Filtered transforms size: 4824
+00:09:32.35| INFO: Backbone filtered transforms size: 4731
+00:09:32.44| INFO: RMSD Clustered transforms size: 3383
+00:09:35.21| INFO: Scored transforms size: 2711
+00:09:35.22| INFO: Done processing patch # 4 out of 44
+00:09:35.26| INFO: Start clustering 92314 transforms
+00:09:35.46| INFO: Clustered transforms size: 427
+00:09:35.50| INFO: Filtered transforms size: 371
+00:09:35.50| INFO: Backbone filtered transforms size: 369
+00:09:35.50| INFO: RMSD Clustered transforms size: 329
+00:09:35.73| INFO: Scored transforms size: 293
+00:09:35.73| INFO: Done processing patch # 5 out of 44
+00:09:35.79| INFO: Start clustering 216039 transforms
+00:09:36.16| INFO: Clustered transforms size: 3039
+00:09:36.38| INFO: Filtered transforms size: 2757
+00:09:36.39| INFO: Backbone filtered transforms size: 2700
+00:09:36.41| INFO: RMSD Clustered transforms size: 2133
+00:09:38.47| INFO: Scored transforms size: 1796
+00:09:38.47| INFO: Done processing patch # 6 out of 44
+00:09:38.53| INFO: Start clustering 223198 transforms
+00:09:38.91| INFO: Clustered transforms size: 3544
+00:09:39.15| INFO: Filtered transforms size: 2833
+00:09:39.15| INFO: Backbone filtered transforms size: 2746
+00:09:39.19| INFO: RMSD Clustered transforms size: 2071
+00:09:41.30| INFO: Scored transforms size: 1393
+00:09:41.30| INFO: Done processing patch # 7 out of 44
+00:09:41.35| INFO: Start clustering 173444 transforms
+00:09:41.65| INFO: Clustered transforms size: 1357
+00:09:41.72| INFO: Filtered transforms size: 300
+00:09:41.72| INFO: Backbone filtered transforms size: 287
+00:09:41.72| INFO: RMSD Clustered transforms size: 255
+00:09:42.03| INFO: Scored transforms size: 131
+00:09:42.03| INFO: Done processing patch # 8 out of 44
+00:09:42.11| INFO: Start clustering 424611 transforms
+00:09:42.90| INFO: Clustered transforms size: 4200
+00:09:43.15| INFO: Filtered transforms size: 3674
+00:09:43.16| INFO: Backbone filtered transforms size: 3599
+00:09:43.21| INFO: RMSD Clustered transforms size: 3004
+00:09:45.78| INFO: Scored transforms size: 2229
+00:09:45.78| INFO: Done processing patch # 9 out of 44
+00:09:45.85| INFO: Start clustering 359320 transforms
+00:09:46.51| INFO: Clustered transforms size: 4339
+00:09:46.76| INFO: Filtered transforms size: 2984
+00:09:46.76| INFO: Backbone filtered transforms size: 2816
+00:09:46.78| INFO: RMSD Clustered transforms size: 2231
+00:09:48.95| INFO: Scored transforms size: 1450
+00:09:48.95| INFO: Done processing patch # 10 out of 44
+00:09:49.03| INFO: Start clustering 511447 transforms
+00:09:49.96| INFO: Clustered transforms size: 9863
+00:09:51.00| INFO: Filtered transforms size: 8228
+00:09:51.02| INFO: Backbone filtered transforms size: 8070
+00:09:51.23| INFO: RMSD Clustered transforms size: 5653
+00:09:54.86| INFO: Scored transforms size: 4162
+00:09:54.86| INFO: Done processing patch # 11 out of 44
+00:09:54.92| INFO: Start clustering 234463 transforms
+00:09:55.35| INFO: Clustered transforms size: 3241
+00:09:55.53| INFO: Filtered transforms size: 2690
+00:09:55.54| INFO: Backbone filtered transforms size: 2599
+00:09:55.57| INFO: RMSD Clustered transforms size: 1943
+00:09:57.36| INFO: Scored transforms size: 1322
+00:09:57.36| INFO: Done processing patch # 12 out of 44
+00:09:57.40| INFO: Start clustering 102053 transforms
+00:09:57.59| INFO: Clustered transforms size: 369
+00:09:57.60| INFO: Filtered transforms size: 142
+00:09:57.60| INFO: Backbone filtered transforms size: 140
+00:09:57.61| INFO: RMSD Clustered transforms size: 132
+00:09:57.73| INFO: Scored transforms size: 80
+00:09:57.73| INFO: Done processing patch # 13 out of 44
+00:09:57.76| INFO: Start clustering 67703 transforms
+00:09:57.88| INFO: Clustered transforms size: 120
+00:09:57.90| INFO: Filtered transforms size: 91
+00:09:57.90| INFO: Backbone filtered transforms size: 88
+00:09:57.90| INFO: RMSD Clustered transforms size: 78
+00:09:57.96| INFO: Scored transforms size: 61
+00:09:57.96| INFO: Done processing patch # 14 out of 44
+00:09:58.00| INFO: Start clustering 124831 transforms
+00:09:58.20| INFO: Clustered transforms size: 425
+00:09:58.23| INFO: Filtered transforms size: 297
+00:09:58.23| INFO: Backbone filtered transforms size: 267
+00:09:58.23| INFO: RMSD Clustered transforms size: 229
+00:09:58.44| INFO: Scored transforms size: 161
+00:09:58.44| INFO: Done processing patch # 15 out of 44
+00:09:58.46| INFO: Start clustering 96234 transforms
+00:09:58.63| INFO: Clustered transforms size: 198
+00:09:58.65| INFO: Filtered transforms size: 178
+00:09:58.65| INFO: Backbone filtered transforms size: 176
+00:09:58.65| INFO: RMSD Clustered transforms size: 164
+00:09:58.75| INFO: Scored transforms size: 143
+00:09:58.75| INFO: Done processing patch # 16 out of 44
+00:09:58.76| INFO: Start clustering 43516 transforms
+00:09:58.84| INFO: Clustered transforms size: 62
+00:09:58.84| INFO: Filtered transforms size: 45
+00:09:58.85| INFO: Backbone filtered transforms size: 43
+00:09:58.85| INFO: RMSD Clustered transforms size: 41
+00:09:58.89| INFO: Scored transforms size: 29
+00:09:58.89| INFO: Done processing patch # 17 out of 44
+00:09:58.96| INFO: Start clustering 417258 transforms
+00:09:59.73| INFO: Clustered transforms size: 7105
+00:10:00.15| INFO: Filtered transforms size: 3488
+00:10:00.16| INFO: Backbone filtered transforms size: 3313
+00:10:00.21| INFO: RMSD Clustered transforms size: 2610
+00:10:03.90| INFO: Scored transforms size: 1497
+00:10:03.90| INFO: Done processing patch # 18 out of 44
+00:10:03.95| INFO: Start clustering 227610 transforms
+00:10:04.44| INFO: Clustered transforms size: 2168
+00:10:04.71| INFO: Filtered transforms size: 1833
+00:10:04.71| INFO: Backbone filtered transforms size: 1780
+00:10:04.73| INFO: RMSD Clustered transforms size: 1501
+00:10:07.11| INFO: Scored transforms size: 966
+00:10:07.13| INFO: Done processing patch # 19 out of 44
+00:10:07.17| INFO: Start clustering 97039 transforms
+00:10:07.50| INFO: Clustered transforms size: 335
+00:10:07.53| INFO: Filtered transforms size: 332
+00:10:07.53| INFO: Backbone filtered transforms size: 330
+00:10:07.53| INFO: RMSD Clustered transforms size: 295
+00:10:07.70| INFO: Scored transforms size: 284
+00:10:07.70| INFO: Done processing patch # 20 out of 44
+00:10:07.75| INFO: Start clustering 122135 transforms
+00:10:08.07| INFO: Clustered transforms size: 271
+00:10:08.10| INFO: Filtered transforms size: 260
+00:10:08.10| INFO: Backbone filtered transforms size: 260
+00:10:08.10| INFO: RMSD Clustered transforms size: 245
+00:10:08.40| INFO: Scored transforms size: 217
+00:10:08.40| INFO: Done processing patch # 21 out of 44
+00:10:08.45| INFO: Start clustering 113499 transforms
+00:10:08.71| INFO: Clustered transforms size: 493
+00:10:08.75| INFO: Filtered transforms size: 485
+00:10:08.75| INFO: Backbone filtered transforms size: 477
+00:10:08.75| INFO: RMSD Clustered transforms size: 433
+00:10:09.00| INFO: Scored transforms size: 401
+00:10:09.00| INFO: Done processing patch # 22 out of 44
+00:10:09.07| INFO: Start clustering 355584 transforms
+00:10:09.76| INFO: Clustered transforms size: 6846
+00:10:10.14| INFO: Filtered transforms size: 5756
+00:10:10.15| INFO: Backbone filtered transforms size: 5656
+00:10:10.25| INFO: RMSD Clustered transforms size: 4296
+00:10:13.48| INFO: Scored transforms size: 3173
+00:10:13.50| INFO: Done processing patch # 23 out of 44
+00:10:13.51| INFO: Start clustering 45637 transforms
+00:10:13.59| INFO: Clustered transforms size: 25
+00:10:13.59| INFO: Filtered transforms size: 5
+00:10:13.59| INFO: Backbone filtered transforms size: 4
+00:10:13.59| INFO: RMSD Clustered transforms size: 3
+00:10:13.59| INFO: Scored transforms size: 3
+00:10:13.59| INFO: Done processing patch # 24 out of 44
+00:10:13.63| INFO: Start clustering 92950 transforms
+00:10:13.78| INFO: Clustered transforms size: 150
+00:10:13.80| INFO: Filtered transforms size: 125
+00:10:13.80| INFO: Backbone filtered transforms size: 120
+00:10:13.80| INFO: RMSD Clustered transforms size: 115
+00:10:13.91| INFO: Scored transforms size: 71
+00:10:13.91| INFO: Done processing patch # 25 out of 44
+00:10:13.97| INFO: Start clustering 346897 transforms
+00:10:14.59| INFO: Clustered transforms size: 3661
+00:10:14.79| INFO: Filtered transforms size: 3262
+00:10:14.80| INFO: Backbone filtered transforms size: 3161
+00:10:14.84| INFO: RMSD Clustered transforms size: 2660
+00:10:16.71| INFO: Scored transforms size: 2053
+00:10:16.71| INFO: Done processing patch # 26 out of 44
+00:10:16.73| INFO: Start clustering 82140 transforms
+00:10:16.90| INFO: Clustered transforms size: 173
+00:10:16.92| INFO: Filtered transforms size: 118
+00:10:16.92| INFO: Backbone filtered transforms size: 111
+00:10:16.92| INFO: RMSD Clustered transforms size: 106
+00:10:17.03| INFO: Scored transforms size: 66
+00:10:17.03| INFO: Done processing patch # 27 out of 44
+00:10:17.09| INFO: Start clustering 316893 transforms
+00:10:17.69| INFO: Clustered transforms size: 4115
+00:10:17.89| INFO: Filtered transforms size: 3582
+00:10:17.90| INFO: Backbone filtered transforms size: 3532
+00:10:17.94| INFO: RMSD Clustered transforms size: 2756
+00:10:19.73| INFO: Scored transforms size: 2004
+00:10:19.73| INFO: Done processing patch # 28 out of 44
+00:10:19.79| INFO: Start clustering 276238 transforms
+00:10:20.30| INFO: Clustered transforms size: 1967
+00:10:20.44| INFO: Filtered transforms size: 1728
+00:10:20.44| INFO: Backbone filtered transforms size: 1647
+00:10:20.45| INFO: RMSD Clustered transforms size: 1388
+00:10:21.42| INFO: Scored transforms size: 1081
+00:10:21.42| INFO: Done processing patch # 29 out of 44
+00:10:21.47| INFO: Start clustering 254424 transforms
+00:10:21.91| INFO: Clustered transforms size: 4295
+00:10:22.13| INFO: Filtered transforms size: 3907
+00:10:22.14| INFO: Backbone filtered transforms size: 3859
+00:10:22.19| INFO: RMSD Clustered transforms size: 2986
+00:10:24.04| INFO: Scored transforms size: 2346
+00:10:24.04| INFO: Done processing patch # 30 out of 44
+00:10:24.07| INFO: Start clustering 58490 transforms
+00:10:24.17| INFO: Clustered transforms size: 53
+00:10:24.19| INFO: Filtered transforms size: 51
+00:10:24.19| INFO: Backbone filtered transforms size: 51
+00:10:24.19| INFO: RMSD Clustered transforms size: 50
+00:10:24.21| INFO: Scored transforms size: 50
+00:10:24.21| INFO: Done processing patch # 31 out of 44
+00:10:24.26| INFO: Start clustering 204307 transforms
+00:10:24.64| INFO: Clustered transforms size: 1964
+00:10:24.76| INFO: Filtered transforms size: 1513
+00:10:24.77| INFO: Backbone filtered transforms size: 1490
+00:10:24.78| INFO: RMSD Clustered transforms size: 1250
+00:10:25.67| INFO: Scored transforms size: 868
+00:10:25.69| INFO: Done processing patch # 32 out of 44
+00:10:25.72| INFO: Start clustering 222318 transforms
+00:10:26.10| INFO: Clustered transforms size: 1026
+00:10:26.17| INFO: Filtered transforms size: 572
+00:10:26.17| INFO: Backbone filtered transforms size: 542
+00:10:26.17| INFO: RMSD Clustered transforms size: 482
+00:10:26.59| INFO: Scored transforms size: 340
+00:10:26.59| INFO: Done processing patch # 33 out of 44
+00:10:26.60| INFO: Start clustering 52589 transforms
+00:10:26.69| INFO: Clustered transforms size: 43
+00:10:26.71| INFO: Filtered transforms size: 26
+00:10:26.71| INFO: Backbone filtered transforms size: 26
+00:10:26.71| INFO: RMSD Clustered transforms size: 26
+00:10:26.72| INFO: Scored transforms size: 21
+00:10:26.72| INFO: Done processing patch # 34 out of 44
+00:10:26.76| INFO: Start clustering 151912 transforms
+00:10:27.01| INFO: Clustered transforms size: 425
+00:10:27.03| INFO: Filtered transforms size: 135
+00:10:27.03| INFO: Backbone filtered transforms size: 119
+00:10:27.03| INFO: RMSD Clustered transforms size: 113
+00:10:27.14| INFO: Scored transforms size: 68
+00:10:27.14| INFO: Done processing patch # 35 out of 44
+00:10:27.14| INFO: Start clustering 13921 transforms
+00:10:27.15| WARNING: Reducing ignoreClustersSmaller parameter
+00:10:27.17| INFO: Clustered transforms size: 3
+00:10:27.17| INFO: Filtered transforms size: 1
+00:10:27.17| INFO: Backbone filtered transforms size: 1
+00:10:27.17| INFO: RMSD Clustered transforms size: 1
+00:10:27.17| INFO: Scored transforms size: 1
+00:10:27.17| INFO: Done processing patch # 36 out of 44
+00:10:27.21| INFO: Start clustering 120423 transforms
+00:10:27.40| INFO: Clustered transforms size: 945
+00:10:27.46| INFO: Filtered transforms size: 533
+00:10:27.46| INFO: Backbone filtered transforms size: 521
+00:10:27.46| INFO: RMSD Clustered transforms size: 443
+00:10:27.78| INFO: Scored transforms size: 344
+00:10:27.78| INFO: Done processing patch # 37 out of 44
+00:10:27.79| INFO: Start clustering 66131 transforms
+00:10:27.90| INFO: Clustered transforms size: 41
+00:10:27.91| INFO: Filtered transforms size: 17
+00:10:27.91| INFO: Backbone filtered transforms size: 15
+00:10:27.91| INFO: RMSD Clustered transforms size: 15
+00:10:27.92| INFO: Scored transforms size: 9
+00:10:27.92| INFO: Done processing patch # 38 out of 44
+00:10:27.96| INFO: Start clustering 115188 transforms
+00:10:28.16| INFO: Clustered transforms size: 997
+00:10:28.23| INFO: Filtered transforms size: 847
+00:10:28.25| INFO: Backbone filtered transforms size: 833
+00:10:28.25| INFO: RMSD Clustered transforms size: 723
+00:10:28.88| INFO: Scored transforms size: 480
+00:10:28.88| INFO: Done processing patch # 39 out of 44
+00:10:28.90| INFO: Start clustering 97940 transforms
+00:10:29.08| INFO: Clustered transforms size: 127
+00:10:29.09| INFO: Filtered transforms size: 106
+00:10:29.09| INFO: Backbone filtered transforms size: 105
+00:10:29.09| INFO: RMSD Clustered transforms size: 87
+00:10:29.17| INFO: Scored transforms size: 65
+00:10:29.17| INFO: Done processing patch # 40 out of 44
+00:10:29.19| INFO: Start clustering 12456 transforms
+00:10:29.20| WARNING: Reducing ignoreClustersSmaller parameter
+00:10:29.21| WARNING: Reducing ignoreClustersSmaller parameter
+00:10:29.23| INFO: Clustered transforms size: 104
+00:10:29.25| INFO: Filtered transforms size: 18
+00:10:29.25| INFO: Backbone filtered transforms size: 16
+00:10:29.25| INFO: RMSD Clustered transforms size: 16
+00:10:29.26| INFO: Scored transforms size: 4
+00:10:29.26| INFO: Done processing patch # 41 out of 44
+00:10:29.27| INFO: Start clustering 18364 transforms
+00:10:29.29| WARNING: Reducing ignoreClustersSmaller parameter
+00:10:29.33| INFO: Clustered transforms size: 13
+00:10:29.34| INFO: Filtered transforms size: 11
+00:10:29.34| INFO: Backbone filtered transforms size: 11
+00:10:29.34| INFO: RMSD Clustered transforms size: 11
+00:10:29.34| INFO: Scored transforms size: 6
+00:10:29.34| INFO: Done processing patch # 42 out of 44
+00:10:29.36| INFO: Start clustering 49325 transforms
+00:10:29.46| INFO: Clustered transforms size: 15
+00:10:29.46| INFO: Filtered transforms size: 2
+00:10:29.46| INFO: Backbone filtered transforms size: 2
+00:10:29.46| INFO: RMSD Clustered transforms size: 2
+00:10:29.46| INFO: Scored transforms size: 1
+00:10:29.46| INFO: Done processing patch # 43 out of 44
+00:10:29.48| INFO: Start clustering 50645 transforms
+00:10:29.59| INFO: Clustered transforms size: 20
+00:10:29.59| INFO: Filtered transforms size: 18
+00:10:29.59| INFO: Backbone filtered transforms size: 17
+00:10:29.59| INFO: RMSD Clustered transforms size: 16
+00:10:29.61| INFO: Scored transforms size: 11
+00:10:29.61| INFO: Done processing patch # 44 out of 44
+00:10:29.61| INFO: ProgTime: prog_time: 00:10:26.10
+00:10:29.61| INFO: Initial results size: 221387
+00:10:29.61| INFO: After removal of low scoring: 201097
+00:12:38.54| INFO: Results size after final clustering: 21396
+00:14:15.09| INFO: Full scored transforms size: 21242
+00:14:15.09| INFO: After full scoring: 21242
+00:14:15.09| INFO: Finish docking
