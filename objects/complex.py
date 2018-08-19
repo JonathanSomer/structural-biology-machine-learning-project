@@ -1,6 +1,4 @@
 from Bio.PDB import NeighborSearch
-from Bio.PDB import PPBuilder
-from utils import pdb_utils
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from Constants import *
