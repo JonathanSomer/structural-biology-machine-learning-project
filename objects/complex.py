@@ -1,4 +1,4 @@
-from Bio.PDB import NeighborSearch
+from Bio.PDB import NeighborSearch, PPBuilder
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from Constants import *
@@ -26,9 +26,11 @@ class Complex(object):
 
     def __init__(self, complex_id):
         self._complex_id = complex_id
+        self._neighbours = None
+        self._add_true_residue_indexes()
         if not self._is_cached():
             self._cache_complex()
-        cache = self._get_complex_cache()
+        cache = self._load_cache()
         self._receptor_sequence, self._ligand_sequence = cache['r_seq'], cache['l_seq']
         self._neighbours = [tuple(nb) for nb in cache['nb5']]
 
@@ -73,7 +75,7 @@ class Complex(object):
 
     def _lazy_init(self, attr_str, init_fn):
         if not hasattr(self, attr_str) or getattr(self, attr_str, None) is None:
-            init_fn(self)
+            init_fn()
         return getattr(self, attr_str)
 
     def _add_true_residue_indexes(self):
@@ -132,7 +134,7 @@ class Complex(object):
         with open(c_path, 'w') as f:
             json.dump(cache, f)
 
-    def _get_complex_cache(self):
+    def _load_cache(self):
         with open(self._get_cache_path(), 'r') as f:
             return json.load(f)
 
@@ -147,9 +149,8 @@ class Complex(object):
 class BenchmarkComplex(Complex):
 
     def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound):
-        super(BenchmarkComplex, self).__init__(complex_id)
         self._type = type
-        self._add_true_residue_indexes()
+        super(BenchmarkComplex, self).__init__(complex_id)
 
     def _init_complex(self):
         bound = self.type == ComplexType.zdock_benchmark_bound
@@ -167,9 +168,9 @@ class BenchmarkComplex(Complex):
 class PatchDockComplex(Complex):
 
     def __init__(self, complex_id, rank):
-        super(PatchDockComplex, self).__init__(complex_id)
-        self._type = ComplexType.patch_dock
         self.original_rank = rank
+        self._type = ComplexType.patch_dock
+        super(PatchDockComplex, self).__init__(complex_id)
         self._add_true_residue_indexes()
 
     def _init_complex(self):
@@ -189,10 +190,10 @@ class PatchDockComplex(Complex):
         ligand = pdb_parser.get_structure(LIGAND_STRUCT_ID, patch_dock_complex_path)
         receptor = pdb_parser.get_structure(RECEPTOR_STRUCT_ID, patch_dock_complex_path)
 
-        for chain_id in self._receptor_chain_ids:
+        for chain_id in _receptor_chain_ids:
             _remove_chain_from_struct(ligand, chain_id)
 
-        for chain_id in self._ligand_chain_ids:
+        for chain_id in _ligand_chain_ids:
             _remove_chain_from_struct(receptor, chain_id)
 
         self._ligand, self._receptor = ligand, receptor
