@@ -11,7 +11,7 @@ warnings.simplefilter('ignore', PDBConstructionWarning)
 
 from utils import pdb_utils
 
-sanity_check = False
+sanity_check = True
 check_patch_dock_seq = True
 
 base_path = os.path.abspath(os.pardir)

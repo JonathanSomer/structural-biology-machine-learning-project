@@ -3,8 +3,10 @@ import matplotlib.pyplot as plt
 from utils import fnat_utils
 
 import numpy as np
+import scipy.stats as stats
 
 from objects import complex as cmp
+from objects.pipeline_handler import ResultsHelper
 from utils import pdb_utils, raptorx_utils
 
 
@@ -19,11 +21,23 @@ def plot_rank_to_fnat(complexes):
     plt.show()
 
 
-def plot_raptor_to_fnat(complexes, raptor_scores):
-    # type: (List[cmp.Complex]) -> None
-    plt.figure(1)
-    capri_scores = [random.random() for complex in complexes]
-    plt.scatter(raptor_scores, capri_scores, c='b')
+def plot_raptor_to_fnat(result_helper):
+    # type: (ResultsHelper) -> None
+    """
+    Scatter plot of (raptor score, fnat score) points for each patchdock results in result_helper
+    Also adds a regression line
+    :param result_helper:
+    :return:
+    """
+    raptor_scores = np.array(result_helper.get_all_ranked_expectation_scores()).flatten()
+    fnat_scores = np.array(result_helper.get_all_fnat_scores_after_reranking()).flatten()
+    # regression line
+    slope, intercept, r_value, p_value, std_err = stats.linregress(raptor_scores, fnat_scores)
+    line = slope * raptor_scores + intercept
+
+    plt.scatter(raptor_scores, fnat_scores, c='b')
+    plt.plot(raptor_scores, line, 'r', label='y={:.3f}x+{:.3f} (R2={:.2f})'.format(slope, intercept, r_value))
+    plt.legend(fontsize=9)
     plt.show()
 
 
