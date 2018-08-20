@@ -27,7 +27,6 @@ class Complex(object):
     def __init__(self, complex_id):
         self._complex_id = complex_id
         self._neighbours = None
-        self._add_true_residue_indexes()
         if not self._is_cached():
             self._cache_complex()
         cache = self._load_cache()
@@ -98,6 +97,7 @@ class Complex(object):
         if self._neighbours:
             return self._neighbours
 
+        self._add_true_residue_indexes()
         ligand_atoms = list(self.ligand.get_atoms())
         receptor_atoms = list(self.receptor.get_atoms())
 
@@ -171,7 +171,6 @@ class PatchDockComplex(Complex):
         self.original_rank = rank
         self._type = ComplexType.patch_dock
         super(PatchDockComplex, self).__init__(complex_id)
-        self._add_true_residue_indexes()
 
     def _init_complex(self):
         # type: () -> None
