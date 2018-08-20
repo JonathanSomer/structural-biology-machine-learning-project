@@ -6,7 +6,7 @@ import numpy as np
 
 from objects import complex as cmp
 from utils import pdb_utils, raptorx_utils
-
+from Constants import *
 
 def plot_rank_to_fnat(complexes):
     # type: (List[complex.Complex]) -> None
@@ -26,13 +26,15 @@ def plot_raptor_to_fnat(complexes, raptor_scores):
     plt.scatter(raptor_scores, capri_scores, c='b')
     plt.show()
 
-
-def plot_raptor_values_bar(bound_complexes, trim=0.01):
-    complex_axis, general_avgs, interaction_avgs, outer_avgs = [], [], [], []
+def plot_average_raptor_score_in_interaction_site_vs_outside_site(bound_complexes, trim=0.01):
+    complex_ids, average_for_all_residues, average_for_residues_in_interaction, average_for_residues_not_in_interaction = [], [], [], []
     interaction_big_prob_count, outer_big_prob_count = [], []
+
+    complex_ids_raptor_score_is_larger_in_binding_site = []
+
     for complex in bound_complexes:
         complex_id = complex.complex_id
-        print complex_id
+        print(complex_id)
         unbound_complex = cmp.BenchmarkComplex(complex.complex_id, type=cmp.ComplexType.zdock_benchmark_unbound)
         receptor_len = len(unbound_complex.receptor_sequence)
         ligand_len = len(unbound_complex.ligand_sequence)
@@ -42,32 +44,52 @@ def plot_raptor_values_bar(bound_complexes, trim=0.01):
                                                                      unbound_complex.receptor_sequence)
         ligand_map = fnat_utils.get_position_map_between_sequences(complex.ligand_sequence,
                                                                    unbound_complex.ligand_sequence)
-        neighbours = complex.get_neighbouring_residues()
+        neighbours = complex.get_neighbours_residues()
         # change from bound indices to unbound indices
         neighbours = [(receptor_map[receptor_id], ligand_map[ligand_id]) for receptor_id, ligand_id in neighbours if
                       receptor_id in receptor_map and ligand_id in ligand_map]
 
         neighbours_indices = tuple(zip(*neighbours))
-        mask = np.zeros(rapt_mat.shape, dtype=bool)  # np.ones_like(a,dtype=bool)
-        mask[neighbours_indices] = True
+        mask_allow_closer_than_5_angstrom = np.zeros(rapt_mat.shape, dtype=bool)  # np.ones_like(a,dtype=bool)
+        mask_allow_closer_than_5_angstrom[neighbours_indices] = True
 
-        complex_axis.append(complex.complex_id)
-        general_avgs.append(np.average(rapt_mat))
-        interaction_avgs.append(np.average(rapt_mat[mask]))
-        outer_avgs.append(np.average(rapt_mat[~mask]))
-        interaction_big_prob_count.append(np.sum(rapt_mat[mask] >= trim) / float(rapt_mat[mask].size))
-        outer_big_prob_count.append(np.sum(rapt_mat[~mask] >= trim) / float(rapt_mat[~mask].size))
-    X = complex_axis
+        complex_ids.append(complex.complex_id)
+        average_for_all_residues.append(np.average(rapt_mat))
+        average_for_residues_in_interaction.append(np.average(rapt_mat[mask_allow_closer_than_5_angstrom]))
+        average_for_residues_not_in_interaction.append(np.average(rapt_mat[~mask_allow_closer_than_5_angstrom]))
+
+        if average_for_residues_in_interaction[-1] > average_for_residues_not_in_interaction[-1]:
+            print("HA", complex_id)
+            complex_ids_raptor_score_is_larger_in_binding_site.append(complex_id)
+
+    X = complex_ids
     _X = np.arange(len(X))
     plt.figure(0)
-    plt.bar(_X - 0.2, interaction_avgs, 0.2)
-    plt.bar(_X + 0.0, outer_avgs, 0.2)
-    plt.bar(_X + 0.2, general_avgs, 0.2)
-    plt.xticks(_X, X)  # set labels manually
-
-    plt.figure(1)
-    plt.bar(_X - 0.2, interaction_big_prob_count, 0.2)
-    plt.bar(_X + 0.0, outer_big_prob_count, 0.2)
+    plt.bar(_X - 0.2, average_for_residues_in_interaction, 0.2)
+    plt.bar(_X + 0.0, average_for_residues_not_in_interaction, 0.2)
+    plt.bar(_X + 0.2, average_for_all_residues, 0.2)
     plt.xticks(_X, X)  # set labels manually
 
     plt.show()
+
+    complex_ids_raptor_score_is_NOT_larger_in_binding_site = [c for c in complex_ids if c not in complex_ids_raptor_score_is_larger_in_binding_site]
+    print("no improvement: ", complex_ids_raptor_score_is_NOT_larger_in_binding_site)
+    print("improvement: ", complex_ids_raptor_score_is_larger_in_binding_site)
+    print("all: ", complex_ids)
+
+    plt.pie(x=[len(complex_ids_raptor_score_is_NOT_larger_in_binding_site), len(complex_ids_raptor_score_is_larger_in_binding_site)],
+            labels=['no improvement', 'improvement'])
+
+    plt.show()
+
+
+# from visualizer.evodock_plot import *
+# plot_raptor_values_bar_on_batch()
+def plot_raptor_values_bar_on_batch():
+    complex_ids = TRAIN_COMPLEX_IDS
+    bound_complexes = []
+    for complex_id in complex_ids:
+        bound_complexes.append(cmp.BenchmarkComplex(complex_id=complex_id, type=cmp.ComplexType.zdock_benchmark_bound))
+
+    plot_average_raptor_score_in_interaction_site_vs_outside_site(bound_complexes)
+

@@ -5,7 +5,7 @@ project_dir = os.path.dirname(os.path.abspath(__file__))
 BASE_DATA_PATH = "data"
 
 # ids for complexes with all data ready
-TRAIN_COMPLEX_IDS = ['1BJ1', '1FSK', '1I9R', '1IQD', '1M10', '1NW9', '1R6Q',  '4G6M']
+TRAIN_COMPLEX_IDS =  ['4G6M', '1CGI', '1ACB', '3HMX', '1BJ1']
 TEST_COMPLEX_IDS = ['4G6J', '1FQ1']
 NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX = 200
 

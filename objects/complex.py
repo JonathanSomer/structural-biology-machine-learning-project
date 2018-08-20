@@ -7,6 +7,7 @@ import json
 
 import warnings
 from Bio.PDB.PDBExceptions import PDBConstructionWarning
+import re
 
 warnings.simplefilter('ignore', PDBConstructionWarning)
 
@@ -88,7 +89,7 @@ class Complex(object):
         for i, residue in enumerate(self.receptor.get_residues()):
             residue.true_index = i
 
-    def get_neighbours_residues(self):
+    def get_neighbours_residues(self, neighbor_radius=NEIHGBOR_RADIUS):
         # type: () -> lst((int, int),...)
         '''
         :return: list of tuples (receptor_residue_index, ligand_residue_index) in which the euclidean distance
@@ -102,7 +103,7 @@ class Complex(object):
         receptor_atoms = list(self.receptor.get_atoms())
 
         nb = NeighborSearch(ligand_atoms + receptor_atoms)
-        all_neighbours = nb.search_all(NEIHGBOR_RADIUS, level='R')
+        all_neighbours = nb.search_all(neighbor_radius, level='R')
 
         neighbor_indexes = []
 
@@ -171,6 +172,7 @@ class PatchDockComplex(Complex):
         self.original_rank = rank
         self._type = ComplexType.patch_dock
         super(PatchDockComplex, self).__init__(complex_id)
+        self.init_patch_dock_score_components()
 
     def _init_complex(self):
         # type: () -> None
@@ -199,3 +201,17 @@ class PatchDockComplex(Complex):
 
     def _get_cache_path(self):
         return get_patchdock_ranked_complex_cache_path(self.complex_id, self.original_rank)
+
+    def init_patch_dock_score_components(self):
+        with open(get_patchdock_complex_score_file_path(self.complex_id), "r") as f:
+            for line in f:
+                pattern = re.compile("^\s+" + str(self.original_rank) + "\s\|.+")
+                if pattern.match(line):
+                    components = [x.strip() for x in line.split('|')]
+                    # rank | score | pen.  | Area    | as1   | as2   | as12  | ACE     | hydroph | Energy  |cluster| dist. || Ligand Transformation
+                    indexes = [1, 2, 3, 7]
+                    self._score_components = [float(components[i]) for i in indexes]
+
+    @property
+    def score_components(self):
+        return self._score_components
