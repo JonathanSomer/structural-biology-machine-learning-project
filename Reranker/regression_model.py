@@ -29,19 +29,10 @@ def get_features_and_labels(use_training_data=True):
 		benchmark_complex = BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_bound)
 
 		for rank in range(1, NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX + 1):
-			pd_complex = PatchDockComplex(complex_id, rank)
+			patch_dock_complex = PatchDockComplex(complex_id, rank)
 
-			features = pd_complex.score_components
-			
-			raptor_matrix = get_raptorx_matrix(complex_id)
-			neighbor_indexes = pd_complex.get_neighbours_residues()
-
-			for method_idx in range(1, len(RaptorXScoringMethod) + 1):
-				for trim in [0.01, 0.05, 0.1]:
-					features.append(get_raptorx_score(raptor_matrix, neighbor_indexes, RaptorXScoringMethod(method_idx), trim))
-			
-
-			target = get_fnat_score(pd_complex, benchmark_complex)
+			features = get_patch_dock_complex_features(patch_dock_complex)
+			target = get_fnat_score(patch_dock_complex, benchmark_complex)
 
 			X.append(features)
 			y.append(target)
@@ -50,6 +41,17 @@ def get_features_and_labels(use_training_data=True):
 
 	return X, y
 
+def get_patch_dock_complex_features(patch_dock_complex, include_raptor_score=True):
+			features = patch_dock_complex.score_components
+			
+			raptor_matrix = get_raptorx_matrix(complex_id)
+			neighbor_indexes = patch_dock_complex.get_neighbours_residues()
+
+			if include_raptor_score:
+				for method_idx in range(1, len(RaptorXScoringMethod) + 1):
+					for trim in [0.01, 0.05, 0.1]:
+						features.append(get_raptorx_score(raptor_matrix, neighbor_indexes, RaptorXScoringMethod(method_idx), trim))
+			return features
 
 def load_features_and_continuous_labels(non_zero_data_only=True):
 	with open(get_file_from_ml_models_path(TRAIN_FEATURES_AND_LABELS_PICKLE), "rb") as f:
@@ -110,7 +112,7 @@ class FnatRegressor(object):
 	def score(self, X, y):
 		return self._regressor.score(X, y)
 
-def predict_fnat(complex_features, non_zero_fnat_classifier, fnat_regressor):
+def predict_fnat_from_features(complex_features, non_zero_fnat_classifier, fnat_regressor):
 	if non_zero_fnat_classifier.predict(complex_features):
 		return fnat_regressor.predict(complex_features)
 	else:
