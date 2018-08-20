@@ -1,8 +1,6 @@
 from Reranker.reranker import RaptorxReranker, RaptorXScoringMethod
 from objects.pipeline_handler import ResultsHelper
 
-train = ['1ACB', '1AVX', '1CGI', '1FQ1', '1FSK', '1I9R', '1IJK', '1IQD', '1KKL', '1KXQ', '1M10', '1MLC', '1NCA', '1QFW', '1R6Q', '1WEJ', '1ZM4', '2FD6', '2I25', '2JEL', '2VXT', '2W9E', '3EOA', '3HMX', '3L5W', '3MXW', '3RVW', '3V6Z', '4DN4', '4G6J', '4G6M']
-with_problem = ['2Z0E', '2NZ8', '1JK9', '1F6M', '1K4C', '1JIW', '1NW9', '1BJ1', '1VFB']
 
 complex_ids = ['1ACB', '1CGI']
 n_of_patchdock_results = 200
