@@ -6,9 +6,12 @@ import numpy as np
 import scipy.stats as stats
 
 from objects import complex as cmp
+from objects.complex import *
 from objects.pipeline_handler import ResultsHelper
 from utils import pdb_utils, raptorx_utils
 from Constants import *
+
+from scipy import stats
 
 def plot_rank_to_fnat(complexes):
     # type: (List[complex.Complex]) -> None
@@ -40,70 +43,46 @@ def plot_raptor_to_fnat(result_helper):
     plt.legend(fontsize=9)
     plt.show()
 
-def plot_average_raptor_score_in_interaction_site_vs_outside_site(bound_complexes, trim=0.01):
-    complex_ids, average_for_all_residues, average_for_residues_in_interaction, average_for_residues_not_in_interaction = [], [], [], []
-    interaction_big_prob_count, outer_big_prob_count = [], []
-
-    complex_ids_raptor_score_is_larger_in_binding_site = []
-
-    for complex in bound_complexes:
-        complex_id = complex.complex_id
-        print(complex_id)
-        unbound_complex = cmp.BenchmarkComplex(complex.complex_id, type=cmp.ComplexType.zdock_benchmark_unbound)
-        receptor_len = len(unbound_complex.receptor_sequence)
-        ligand_len = len(unbound_complex.ligand_sequence)
-        rapt_mat = raptorx_utils.get_raptorx_matrix(complex_id, desired_shape=(receptor_len, ligand_len))
-
-        receptor_map = fnat_utils.get_position_map_between_sequences(complex.receptor_sequence,
-                                                                     unbound_complex.receptor_sequence)
-        ligand_map = fnat_utils.get_position_map_between_sequences(complex.ligand_sequence,
-                                                                   unbound_complex.ligand_sequence)
-        neighbours = complex.get_neighbours_residues()
-        # change from bound indices to unbound indices
-        neighbours = [(receptor_map[receptor_id], ligand_map[ligand_id]) for receptor_id, ligand_id in neighbours if
-                      receptor_id in receptor_map and ligand_id in ligand_map]
-
-        neighbours_indices = tuple(zip(*neighbours))
-        mask_allow_closer_than_5_angstrom = np.zeros(rapt_mat.shape, dtype=bool)  # np.ones_like(a,dtype=bool)
-        mask_allow_closer_than_5_angstrom[neighbours_indices] = True
-
-        complex_ids.append(complex.complex_id)
-        average_for_all_residues.append(np.average(rapt_mat))
-        average_for_residues_in_interaction.append(np.average(rapt_mat[mask_allow_closer_than_5_angstrom]))
-        average_for_residues_not_in_interaction.append(np.average(rapt_mat[~mask_allow_closer_than_5_angstrom]))
-
-        if average_for_residues_in_interaction[-1] > average_for_residues_not_in_interaction[-1]:
-            print("HA", complex_id)
-            complex_ids_raptor_score_is_larger_in_binding_site.append(complex_id)
-
-    X = complex_ids
-    _X = np.arange(len(X))
-    plt.figure(0)
-    plt.bar(_X - 0.2, average_for_residues_in_interaction, 0.2)
-    plt.bar(_X + 0.0, average_for_residues_not_in_interaction, 0.2)
-    plt.bar(_X + 0.2, average_for_all_residues, 0.2)
-    plt.xticks(_X, X)  # set labels manually
-
-    plt.show()
-
-    complex_ids_raptor_score_is_NOT_larger_in_binding_site = [c for c in complex_ids if c not in complex_ids_raptor_score_is_larger_in_binding_site]
-    print("no improvement: ", complex_ids_raptor_score_is_NOT_larger_in_binding_site)
-    print("improvement: ", complex_ids_raptor_score_is_larger_in_binding_site)
-    print("all: ", complex_ids)
-
-    plt.pie(x=[len(complex_ids_raptor_score_is_NOT_larger_in_binding_site), len(complex_ids_raptor_score_is_larger_in_binding_site)],
-            labels=['no improvement', 'improvement'])
-
-    plt.show()
-
-
 # from visualizer.evodock_plot import *
-# plot_raptor_values_bar_on_batch()
-def plot_raptor_values_bar_on_batch():
-    complex_ids = TRAIN_COMPLEX_IDS
-    bound_complexes = []
-    for complex_id in complex_ids:
-        bound_complexes.append(cmp.BenchmarkComplex(complex_id=complex_id, type=cmp.ComplexType.zdock_benchmark_bound))
+# plot_average_raptor_score_in_binding_site_vs_not()
+def plot_average_raptor_score_in_binding_site_vs_not(trim=0.01):
+    bound_complexes = [BenchmarkComplex(complex_id=complex_id, type=ComplexType.zdock_benchmark_bound) for complex_id in TRAIN_COMPLEX_IDS]
 
-    plot_average_raptor_score_in_interaction_site_vs_outside_site(bound_complexes)
+    complex_ids = np.array([bound_complex.complex_id for bound_complex in bound_complexes])
+    average_raptor_scores_for_neighbors, average_raptor_scores_for_non_neighbors = [], []
+    
+    for bound_complex in bound_complexes:
+        complex_id = bound_complex.complex_id
 
+        raptor_matrix = raptorx_utils.get_raptor_matrix_for_bound_complex(bound_complex)
+        neighbor_indexes = fnat_utils.get_neighbours_for_bound_complex(bound_complex)
+
+        neighbor_mask = np.zeros(raptor_matrix.shape, dtype=bool)
+        neighbor_mask[neighbor_indexes] = True
+
+        average_raptor_scores_for_neighbors.append(np.average(raptor_matrix[neighbor_mask]))
+        average_raptor_scores_for_non_neighbors.append(np.average(raptor_matrix[~neighbor_mask]))
+
+    # import pdb; pdb.set_trace()
+    indexes = np.subtract(average_raptor_scores_for_non_neighbors, average_raptor_scores_for_neighbors).argsort()
+
+    complex_ids = complex_ids[indexes]
+    average_raptor_scores_for_neighbors = np.array(average_raptor_scores_for_neighbors)[indexes]
+    average_raptor_scores_for_non_neighbors = np.array(average_raptor_scores_for_non_neighbors)[indexes]
+
+    # import pdb; pdb.set_trace()
+    _X = np.arange(len(complex_ids))
+    plt.figure(0)
+    plt.bar(_X - 0.2, average_raptor_scores_for_neighbors, 0.2)
+    plt.bar(_X + 0.0, average_raptor_scores_for_non_neighbors, 0.2)
+    plt.xticks(_X, complex_ids)  # set labels manually
+
+    plt.show()
+
+    improvement_complex_ids = complex_ids[np.greater(average_raptor_scores_for_neighbors, average_raptor_scores_for_non_neighbors)]
+    no_improvement_complex_ids = [c for c in complex_ids if c not in improvement_complex_ids]
+
+    plt.pie(x=[len(no_improvement_complex_ids), len(improvement_complex_ids)],
+            labels=['average raptor score lower in binding site', 'average raptor score higher in binding site'])
+
+    plt.show()

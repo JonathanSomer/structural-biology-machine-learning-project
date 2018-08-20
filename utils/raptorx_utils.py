@@ -2,7 +2,7 @@ from enum import Enum
 import os
 import numpy as np
 import Constants
-
+from objects.complex import *
 
 class RaptorXScoringMethod(Enum):
     """
@@ -65,3 +65,10 @@ def get_raptorx_score(raptorx_mat, neighbour_indices, method, trim):
         return np.sum(np.log(neighbour_scores))
     elif method == RaptorXScoringMethod.likelihood:
         return np.prod(neighbour_scores)
+
+def get_raptor_matrix_for_bound_complex(bound_complex):
+    unbound_complex = BenchmarkComplex(bound_complex.complex_id, type=ComplexType.zdock_benchmark_unbound)
+    receptor_len = len(unbound_complex.receptor_sequence)
+    ligand_len = len(unbound_complex.ligand_sequence)
+    return get_raptorx_matrix(bound_complex.complex_id, desired_shape=(receptor_len, ligand_len))
+

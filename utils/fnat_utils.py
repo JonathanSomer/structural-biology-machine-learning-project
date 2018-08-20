@@ -1,4 +1,5 @@
 from Bio import pairwise2
+from objects.complex import *
 
 def get_fnat_score(estimated_complex, banchmark_complex):
     return float(len(_intersect_neighbours_between_complexes(estimated_complex, banchmark_complex)) /
@@ -37,3 +38,14 @@ def _get_position_map_from_alignment(align1, align2, score, begin, end):
         i += 1
     return index_map
 
+def get_neighbours_for_bound_complex(bound_complex):
+    unbound_complex = BenchmarkComplex(bound_complex.complex_id, type=ComplexType.zdock_benchmark_unbound)
+
+    receptor_map = get_position_map_between_sequences(bound_complex.receptor_sequence,
+                                                                 unbound_complex.receptor_sequence)
+    ligand_map = get_position_map_between_sequences(bound_complex.ligand_sequence,
+                                                               unbound_complex.ligand_sequence)
+    # change from bound indices to unbound indices
+    neighbours = [(receptor_map[receptor_id], ligand_map[ligand_id]) for receptor_id, ligand_id in bound_complex.get_neighbours_residues() if
+                  receptor_id in receptor_map and ligand_id in ligand_map]
+    return tuple(zip(*neighbours))
