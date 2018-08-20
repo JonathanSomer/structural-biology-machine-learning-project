@@ -1,5 +1,4 @@
 from Bio import pairwise2
-from utils.pdb_utils import get_structure_sequence
 
 def get_fnat_score(estimated_complex, banchmark_complex):
     return float(len(_intersect_neighbours_between_complexes(estimated_complex, banchmark_complex)) /
@@ -7,20 +6,18 @@ def get_fnat_score(estimated_complex, banchmark_complex):
 
 def _intersect_neighbours_between_complexes(c1, c2):
     neighbours_c1, neighbours_c2 = set(c1.get_neighbours_residues()), set(c2.get_neighbours_residues())
-    receptor_pos_map = _get_position_map_between_structs(c1.receptor, c2.receptor)
-    ligand_pos_map = _get_position_map_between_structs(c1.ligand, c2.ligand)
+    receptor_pos_map = get_position_map_between_sequences(c1.receptor_sequence, c2.receptor_sequence)
+    ligand_pos_map = get_position_map_between_sequences(c1.ligand_sequence, c2.ligand_sequence)
     joint_neighbors = [(neighbor_1_pos, neighbor_2_pos) for (neighbor_1_pos, neighbor_2_pos) in neighbours_c1
                        if (receptor_pos_map.get(neighbor_1_pos, -1), ligand_pos_map.get(neighbor_2_pos, -1))
                        in neighbours_c2]
     return joint_neighbors
 
-def _get_position_map_between_structs(struct1, struct2):
+def get_position_map_between_sequences(seq1, seq2):
     '''
-    :return: a map from residues indices of struct1 to indices in struct2 corresponding to their pairwise alignment
+    :return: a map from residues indices of seq1 to indices in seq2 corresponding to their pairwise alignment
     '''
-    alignments = pairwise2.align.globalxx(
-        get_structure_sequence(struct1),
-        get_structure_sequence(struct2))
+    alignments = pairwise2.align.globalxx(seq1, seq2)
     return _get_position_map_from_alignment(*alignments[0])
 
 

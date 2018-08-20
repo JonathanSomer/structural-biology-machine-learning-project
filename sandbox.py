@@ -10,6 +10,7 @@ from Bio.PDB.PDBExceptions import PDBConstructionWarning
 warnings.simplefilter('ignore', PDBConstructionWarning)
 
 from utils import pdb_utils
+from objects import complex
 
 sanity_check = False
 check_patch_dock_seq = True
@@ -44,29 +45,13 @@ def copy_benchmark_pdb(complex_id, complex_benchmark_path, ligand=True, bound=Tr
 benchmark_metadata = pd.read_excel(os.path.join(benchmark_path, 'Table_BM5.xlsx'), header=0,
                                    skiprows=[0, 1, 3, 155, 201])
 
-for complex in benchmark_metadata.itertuples(index=False, name='Complex'):
+for comp_row in benchmark_metadata.itertuples(index=False, name='Complex'):
     # parse complex str to get complex_id.
-    comp_re_search = re.search('([0-9a-zA-Z]*)_([a-zA-Z]*):([a-zA-Z]*)', complex[0])
+    comp_re_search = re.search('([0-9a-zA-Z]*)_([a-zA-Z]*):([a-zA-Z]*)', comp_row[0])
     complex_id = comp_re_search.group(1)
     complex_path = os.path.join(data_path, complex_id)
     complex_benchmark_path = os.path.join(complex_path, 'benchmark')
 
-    # copy pdbs
-    ligand_u_path = copy_benchmark_pdb(complex_id, complex_benchmark_path, ligand=True, bound=False)
-    receptor_u_path = copy_benchmark_pdb(complex_id, complex_benchmark_path, ligand=False, bound=False)
-    ligand_b_path = copy_benchmark_pdb(complex_id, complex_benchmark_path, ligand=True, bound=True)
-    receptor_b_path = copy_benchmark_pdb(complex_id, complex_benchmark_path, ligand=False, bound=True)
+    unbound = complex.BenchmarkComplex(complex_id, complex.ComplexType.zdock_benchmark_unbound)
 
-    ligand_u = pdb_parser.get_structure(complex_id + '_l_u', ligand_u_path)
-    receptor_u = pdb_parser.get_structure(complex_id + '_r_u', receptor_u_path)
-
-    ligand_u_seq = pdb_utils.get_structure_sequence(ligand_u)
-    receptor_u_seq = pdb_utils.get_structure_sequence(receptor_u)
-
-    with open(os.path.join(complex_benchmark_path, 'ligand.fasta'), 'w') as f:
-        f.write('>ligand_%s\n' % complex_id)
-        f.write(ligand_u_seq)
-
-    with open(os.path.join(complex_benchmark_path, 'receptor.fasta'), 'w') as f:
-        f.write('>receptor_%s\n' % complex_id)
-        f.write(receptor_u_seq)
+    for
