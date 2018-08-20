@@ -1,8 +1,7 @@
-from Reranker.reranker import RaptorxReranker
-from utils.raptorx_utils import RaptorXScoringMethod
+from Reranker.reranker import RaptorxReranker, RaptorXScoringMethod
 from objects.pipeline_handler import PipelineHandler
 
-complex_id = '1ACB'
+complex_id = '1BJ1'
 n_of_patchdock_results = 200
 reranker = RaptorxReranker(scoring_method=RaptorXScoringMethod.log_likelihood,
                            prob_trim=0.01)
