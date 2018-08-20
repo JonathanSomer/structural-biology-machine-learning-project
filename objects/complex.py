@@ -5,6 +5,8 @@ from abc import ABCMeta, abstractmethod
 from enum import Enum
 from Constants import *
 from utils.pdb_utils import pdb_parser
+import re
+
 
 
 NEIHGBOR_RADIUS = 5
@@ -96,7 +98,6 @@ class Complex(object):
 
         return neighbor_indexes
 
-
 class BenchmarkComplex(Complex):
     def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound):
         self._complex_id = complex_id
@@ -123,8 +124,23 @@ class PatchDockComplex(Complex):
         self.original_rank = rank
         self._ligand, self._receptor = self._init_complex()
         self.add_true_residue_indexes()
+        self.init_patch_dock_score_components()
         # self.capri_score = self.calculate_capri_score()
         # self.raptor_score = self.calculate_raptor_score()
+
+    def init_patch_dock_score_components(self):
+        with open(get_patchdock_complex_score_file_path(self.complex_id), "r") as f:
+            for line in f:
+                pattern = re.compile("^\s+" + str(self.original_rank) + "\s\|.+")
+                if pattern.match(line):
+                    components = [x.strip() for x in line.split('|')]
+                    # rank | score | pen.  | Area    | as1   | as2   | as12  | ACE     | hydroph | Energy  |cluster| dist. || Ligand Transformation
+                    indexes = [1, 2, 3, 7]
+                    self._score_components = [float(components[i]) for i in indexes]
+
+    @property
+    def score_components(self):
+        return self._score_components
 
     def get_chains(self):
         benchmark_complex = BenchmarkComplex(self._complex_id, type=ComplexType.zdock_benchmark_unbound)
