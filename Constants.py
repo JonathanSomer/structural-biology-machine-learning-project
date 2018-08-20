@@ -1,12 +1,19 @@
 import os.path
 
+
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
 BASE_DATA_PATH = "data"
 
 # ids for complexes with all data ready
-TRAIN_COMPLEX_IDS =  ['4G6M', '1CGI', '1ACB', '3HMX', '1BJ1']
-TEST_COMPLEX_IDS = ['4G6J', '1FQ1']
+
+TRAIN_COMPLEX_IDS = ['1ACB', '1AVX', '1CGI', '1FSK', '1I9R', '1IJK', '1IQD', '1KKL', '1KXQ', '1M10',
+                     '1MLC', '1NCA', '1QFW', '1R6Q', '2FD6', '2I25', '2JEL', '2VXT',
+                     '2W9E', '3EOA', '3HMX', '3L5W', '3MXW', '3RVW', '3V6Z', '4DN4', '4G6M']
+
+IDS_WITH_PROBLEM = ['2Z0E', '2NZ8', '1JK9', '1F6M', '1K4C', '1JIW', '1NW9', '1BJ1', '1VFB', '1WEJ']
+TEST_COMPLEX_IDS = ['4G6J', '1FQ1', '1ZM4']
+
 NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX = 200
 
 def get_zdock_benchmark_pdb_path(complex_id, ligand=True, bound=True):
