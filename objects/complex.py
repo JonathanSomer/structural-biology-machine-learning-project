@@ -2,7 +2,8 @@ from Bio.PDB import NeighborSearch
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from Constants import *
-from utils.pdb_utils import pdb_parser
+from utils.pdb_utils import pdb_parser, get_structure_sequence
+import json
 
 NEIHGBOR_RADIUS = 5
 LIGAND_STRUCT_ID = 'ligand'
@@ -86,16 +87,40 @@ class Complex(object):
         self._neighbours = neighbor_indexes
         return self._neighbours
 
+    def _cache_complex(self):
+        c_path = self._get_cache_path()
+        cache = {
+            "complex_id": self.complex_id,
+            "l_seq": get_structure_sequence(self.ligand),
+            "r_seq": get_structure_sequence(self.receptor),
+            "nb5": self.get_neighbours_residues()
+        }
+        with open(c_path, 'w') as f:
+            json.dump(cache, f)
+
+    def _get_complex_cache(self):
+        with open(self._get_cache_path(), 'r') as f:
+            return json.load(f)
+
+    def _is_cached(self):
+        return os.path.isfile(self._get_cache_path())
+
+    @abstractmethod
+    def _get_cache_path(self):
+        raise NotImplementedError("abs method")
 
 class BenchmarkComplex(Complex):
 
     def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound):
         super(BenchmarkComplex, self).__init__()
-        self._complex_id = complex_id
         self._type = type
+        self._complex_id = complex_id
         self._ligand, self._receptor = self._init_complex()
         self._add_true_residue_indexes()
-        self._neighbours = None
+        if not self._is_cached():
+            self._cache_complex()
+        cache = self._get_complex_cache()
+        self._neighbours = [tuple(nb) for nb in cache['nb5']]
 
     def _init_complex(self):
         bound = self.type == ComplexType.zdock_benchmark_bound
@@ -105,6 +130,9 @@ class BenchmarkComplex(Complex):
         receptor = pdb_parser.get_structure(RECEPTOR_STRUCT_ID, receptor_pdb_file_path)
         return ligand, receptor
 
+    def _get_cache_path(self):
+        bound = self.type == ComplexType.zdock_benchmark_bound
+        return get_zdock_benchmark_cache_path(self.complex_id, bound)
 
 class PatchDockComplex(Complex):
 
@@ -116,6 +144,10 @@ class PatchDockComplex(Complex):
         self._ligand_chain_ids, self._receptor_chain_ids = self._infer_r_l_chain_ids_from_banchmark_complex()
         self._ligand, self._receptor = self._init_complex()
         self._add_true_residue_indexes()
+        if not self._is_cached():
+            self._cache_complex()
+        cache = self._get_complex_cache()
+        self._neighbours = [tuple(nb) for nb in cache['nb5']]
 
     def _infer_r_l_chain_ids_from_banchmark_complex(self):
         benchmark_complex = BenchmarkComplex(self._complex_id, type=ComplexType.zdock_benchmark_unbound)
@@ -140,3 +172,6 @@ class PatchDockComplex(Complex):
     def _remove_chain_from_struct(self, struct, chain_id):
         first_model = struct.get_list()[0]  # struct children are models
         first_model.detach_child(chain_id)  # model children are chains
+
+    def _get_cache_path(self):
+        return get_patchdock_ranked_complex_cache_path(self.complex_id, self.original_rank)
