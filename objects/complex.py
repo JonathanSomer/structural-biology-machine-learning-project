@@ -1,24 +1,37 @@
 from Bio.PDB import NeighborSearch
-from Bio.PDB import PPBuilder
-from utils import pdb_utils
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from Constants import *
 from utils.pdb_utils import pdb_parser
 import re
+import json
 
+import warnings
+from Bio.PDB.PDBExceptions import PDBConstructionWarning
 
+warnings.simplefilter('ignore', PDBConstructionWarning)
 
 NEIHGBOR_RADIUS = 5
+LIGAND_STRUCT_ID = 'ligand'
+RECEPTOR_STRUCT_ID = 'receptor'
+
 
 class ComplexType(Enum):
     zdock_benchmark_bound = 1
     zdock_benchmark_unbound = 2
-    patch_dock = 3      
+    patch_dock = 3
 
 
 class Complex(object):
     __metaclass__ = ABCMeta
+
+    def __init__(self, complex_id):
+        self._complex_id = complex_id
+        if not self._is_cached():
+            self._cache_complex()
+        cache = self._get_complex_cache()
+        self._receptor_sequence, self._ligand_sequence = cache['r_seq'], cache['l_seq']
+        self._neighbours = [tuple(nb) for nb in cache['nb5']]
 
     @property
     def complex_id(self):
@@ -30,98 +43,134 @@ class Complex(object):
 
     @property
     def receptor(self):
-        return self._receptor
+        return self._lazy_init('_receptor', self._init_complex)
 
     @property
     def ligand(self):
-        return self._ligand
+        return self._lazy_init('_ligand', self._init_complex)
+
+    @property
+    def receptor_sequence(self):
+        return self._receptor_sequence
+
+    @property
+    def ligand_sequence(self):
+        return self._ligand_sequence
+
+    @staticmethod
+    def get_structure_sequence(struct):
+        # type: (Structure) -> str
+        """
+        Gets the structure sequence using PPBuilder
+        :param struct: Structure object
+        :return: struct sequence
+        """
+        ppb = PPBuilder()
+        return ''.join([str(pp.get_sequence()) for pp in ppb.build_peptides(struct)])
 
     @abstractmethod
     def _init_complex(self):
         pass
 
-    def add_true_residue_indexes(self):
+    def _lazy_init(self, attr_str, init_fn):
+        if not hasattr(self, attr_str) or getattr(self, attr_str, None) is None:
+            init_fn(self)
+        return getattr(self, attr_str)
+
+    def _add_true_residue_indexes(self):
+        '''
+        adds for each residue (or ligand ot receptor) a 'true' index, i.e it's index when counting all residues
+        starting from one in same order they appear in the pdb file.  the indices are global among chains of same protein
+        '''
         for i, residue in enumerate(self.ligand.get_residues()):
             residue.true_index = i
 
         for i, residue in enumerate(self.receptor.get_residues()):
             residue.true_index = i
-        
-    def get_neighbouring_residues(self):
+
+    def get_neighbours_residues(self):
+        # type: () -> lst((int, int),...)
+        '''
+        :return: list of tuples (receptor_residue_index, ligand_residue_index) in which the euclidean distance
+                 between them is at most $(NEIGHBOURS_RADIUS)
+        '''
+        if self._neighbours:
+            return self._neighbours
+
         ligand_atoms = list(self.ligand.get_atoms())
         receptor_atoms = list(self.receptor.get_atoms())
 
         nb = NeighborSearch(ligand_atoms + receptor_atoms)
-        search_results = nb.search_all(NEIHGBOR_RADIUS, level='R')
-        
+        all_neighbours = nb.search_all(NEIHGBOR_RADIUS, level='R')
+
         neighbor_indexes = []
 
-        for residue_1, residue_2 in search_results:
-            type_1, type_2 = residue_1.get_full_id()[0], residue_2.get_full_id()[0]
-            
-            if type_1 == type_2:
+        for residue_neighbor_A, residue_neighbor_B in all_neighbours:
+            neighbor_A_struct_id, neighbor_B_struct_id = residue_neighbor_A.get_full_id()[0], \
+                                                         residue_neighbor_B.get_full_id()[0]
+
+            if neighbor_A_struct_id == neighbor_B_struct_id:  # means both from receptor or both from ligand
                 continue
 
-            if type_1 == 'ligand':
-                receptor_residue, ligand_residue = residue_2, residue_1
+            if neighbor_A_struct_id == RECEPTOR_STRUCT_ID:
+                receptor_residue, ligand_residue = residue_neighbor_A, residue_neighbor_B
             else:
-                receptor_residue, ligand_residue = residue_1, residue_2
+                receptor_residue, ligand_residue = residue_neighbor_B, residue_neighbor_A
 
             neighbor_indexes.append((receptor_residue.true_index, ligand_residue.true_index))
 
-        return neighbor_indexes
+        self._neighbours = neighbor_indexes
+        return self._neighbours
 
-    def get_true_and_false_indexes_of_neighbors(self):
-        ligand_atoms = list(self.ligand.get_atoms())
-        receptor_atoms = list(self.receptor.get_atoms())
+    def _cache_complex(self):
+        c_path = self._get_cache_path()
+        cache = {
+            "complex_id": self.complex_id,
+            "l_seq": Complex.get_structure_sequence(self.ligand),
+            "r_seq": Complex.get_structure_sequence(self.receptor),
+            "nb5": self.get_neighbours_residues()
+        }
+        with open(c_path, 'w') as f:
+            json.dump(cache, f)
 
-        nb = NeighborSearch(ligand_atoms + receptor_atoms)
-        search_results = nb.search_all(NEIHGBOR_RADIUS, level='R')
-        
-        neighbor_indexes = []
+    def _get_complex_cache(self):
+        with open(self._get_cache_path(), 'r') as f:
+            return json.load(f)
 
-        for residue_1, residue_2 in search_results:
-            type_1, type_2 = residue_1.get_full_id()[0], residue_2.get_full_id()[0]
-            
-            if type_1 == type_2:
-                continue
+    def _is_cached(self):
+        return os.path.isfile(self._get_cache_path())
 
-            if type_1 == 'ligand':
-                receptor_residue, ligand_residue = residue_2, residue_1
-            else:
-                receptor_residue, ligand_residue = residue_1, residue_2
-
-            neighbor_indexes.append({"true_receptor_index" : receptor_residue.true_index, 
-                                     "false_receptor_index" :  receptor_residue.get_id()[1], 
-                                     "true_ligand_index" : ligand_residue.true_index, 
-                                     "false_ligand_index" :  ligand_residue.get_id()[1]})
-
-        return neighbor_indexes
+    @abstractmethod
+    def _get_cache_path(self):
+        raise NotImplementedError("abs method")
 
 class BenchmarkComplex(Complex):
-    def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound):
-        self._complex_id = complex_id
-        self._type = type
 
-        self._ligand, self._receptor = self._init_complex()
-        self.add_true_residue_indexes()
+    def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound):
+        super(BenchmarkComplex, self).__init__(complex_id)
+        self._type = type
+        self._add_true_residue_indexes()
 
     def _init_complex(self):
         bound = self.type == ComplexType.zdock_benchmark_bound
         ligand_pdb_file_path = get_zdock_benchmark_pdb_path(self.complex_id, ligand=True, bound=bound)
         receptor_pdb_file_path = get_zdock_benchmark_pdb_path(self.complex_id, ligand=False, bound=bound)
-        ligand = pdb_parser.get_structure('ligand', ligand_pdb_file_path)
-        receptor = pdb_parser.get_structure('receptor', receptor_pdb_file_path)
-        return ligand, receptor
+        ligand = pdb_parser.get_structure(LIGAND_STRUCT_ID, ligand_pdb_file_path)
+        receptor = pdb_parser.get_structure(RECEPTOR_STRUCT_ID, receptor_pdb_file_path)
+        self._ligand, self._receptor = ligand, receptor
+
+    def _get_cache_path(self):
+        bound = self.type == ComplexType.zdock_benchmark_bound
+        return get_zdock_benchmark_cache_path(self.complex_id, bound)
 
 
 class PatchDockComplex(Complex):
-    def __init__(self, complex_id, rank):
-        self._complex_id = complex_id
-        self._type = ComplexType.patch_dock
 
-        self.ligand_chain_ids, self.receptor_chain_ids = self.get_chains()
+    def __init__(self, complex_id, rank):
+        super(PatchDockComplex, self).__init__(complex_id)
+        self._type = ComplexType.patch_dock
         self.original_rank = rank
+<<<<<<< HEAD
         self._ligand, self._receptor = self._init_complex()
         self.add_true_residue_indexes()
         self.init_patch_dock_score_components()
@@ -148,23 +197,34 @@ class PatchDockComplex(Complex):
         ligand_chain_ids = [chain.get_id() for chain in list(benchmark_complex.ligand.get_chains())]
 
         return ligand_chain_ids, receptor_chain_ids
+=======
+        self._add_true_residue_indexes()
+>>>>>>> 936cbacce422d94d78ac34973cbd20ba2ecaa4fc
 
     def _init_complex(self):
+        # type: () -> None
+        def _infer_r_l_chain_ids_from_benchmark_complex(self):
+            benchmark_complex = BenchmarkComplex(self._complex_id, type=ComplexType.zdock_benchmark_unbound)
+            receptor_chain_ids = [chain.get_id() for chain in list(benchmark_complex.receptor.get_chains())]
+            ligand_chain_ids = [chain.get_id() for chain in list(benchmark_complex.ligand.get_chains())]
+            return ligand_chain_ids, receptor_chain_ids
+
+        def _remove_chain_from_struct(struct, chain_id):
+            first_model = struct.get_list()[0]  # struct children are models
+            first_model.detach_child(chain_id)  # model children are chains
+
+        _ligand_chain_ids, _receptor_chain_ids = _infer_r_l_chain_ids_from_benchmark_complex(self)
         patch_dock_complex_path = get_patchdock_ranked_complex_pdb_path(self._complex_id, self.original_rank)
+        ligand = pdb_parser.get_structure(LIGAND_STRUCT_ID, patch_dock_complex_path)
+        receptor = pdb_parser.get_structure(RECEPTOR_STRUCT_ID, patch_dock_complex_path)
 
-        patch_dock_ligand = pdb_parser.get_structure('ligand', patch_dock_complex_path)
-        patch_dock_receptor = pdb_parser.get_structure('receptor', patch_dock_complex_path)
+        for chain_id in self._receptor_chain_ids:
+            _remove_chain_from_struct(ligand, chain_id)
 
-        for chain_id in self.receptor_chain_ids:
-            patch_dock_ligand.get_list()[0].detach_child(chain_id)
+        for chain_id in self._ligand_chain_ids:
+            _remove_chain_from_struct(receptor, chain_id)
 
-        for chain_id in self.ligand_chain_ids:
-            patch_dock_receptor.get_list()[0].detach_child(chain_id)
+        self._ligand, self._receptor = ligand, receptor
 
-        return patch_dock_ligand, patch_dock_receptor
-
-    # def calculate_capri_score(self):
-    #     raise NotImplementedError("Should implement this method")
-
-    # def calculate_raptor_score(self):
-    #     raise NotImplementedError("Should implement this method")
+    def _get_cache_path(self):
+        return get_patchdock_ranked_complex_cache_path(self.complex_id, self.original_rank)
