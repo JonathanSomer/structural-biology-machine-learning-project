@@ -40,12 +40,19 @@ class ResultsHelper(object):
     def get_capri_score_of_reranking(self, complex_id):
         return self.complex_helpers[complex_id].get_capri_score_of_reranking()
 
-    def get_all_fnat_scores_reranking(self, after, top=None):
-        return np.array([self.get_fnat_scores_reranking(complex_id, after, top)
+    def get_all_fnat_scores(self, after, top=None):
+        # type: (bool, Union[int, None]) -> np.ndarray
+        """
+        Gets the fnat scores before or after reranking (depending on after argument) for all complexes.
+        :param after: Should order the scores by the reranking order or the original order
+        :param top: return only the top results, by default None, which returns all scores
+        :return: np.ndarray of fnat scores
+        """
+        return np.array([self.get_fnat_scores(complex_id, after, top)
                          for complex_id in self.complex_ids])
 
-    def get_fnat_scores_reranking(self, complex_id, after, top=None):
-        return self.complex_helpers[complex_id].get_fnat_scores_before_reranking(top)
+    def get_fnat_scores(self, complex_id, after, top=None):
+        return self.complex_helpers[complex_id].get_fnat_scores(after, top)
 
     def get_all_ranked_expectation_scores(self):
         return np.array([self.get_ranked_expectation_scores(complex_id)
@@ -76,7 +83,7 @@ class ComplexHelper(object):
     def get_capri_score_of_reranking(self):
         return get_capri_score(self.reranked_complexes, self.bound_complex)
 
-    def get_fnat_scores_reranking(self, after, top=None):
+    def get_fnat_scores(self, after, top=None):
         scores = []
         complexes = self.reranked_complexes if after else self.original_ranked_complexes
         for i in range(top or self.n_of_patchdock_results):

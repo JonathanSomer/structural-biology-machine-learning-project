@@ -1,4 +1,4 @@
-from Bio.PDB import NeighborSearch, PPBuilder
+from Bio.PDB import NeighborSearch, PPBuilder, Residue
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from Constants import *
@@ -58,6 +58,68 @@ class Complex(object):
     def ligand_sequence(self):
         return self._ligand_sequence
 
+    def get_neighbours_residues(self, neighbor_radius=NEIHGBOR_RADIUS):
+        # type: () -> lst((int, int),...)
+        '''
+        :return: list of tuples (receptor_residue_index, ligand_residue_index) in which the euclidean distance
+                 between them is at most $(NEIGHBOURS_RADIUS)
+        '''
+
+        def is_protein_residue(residue):
+            # type: (Residue) -> bool
+            """
+            Checks if the residue comes from a protein
+            :param residue: the given residue
+            :return: is from protein
+            """
+            return residue.id[0] == ' '
+
+        def add_true_residue_indexes(struct):
+            """
+            adds for each residue in struct add a 'true' index, i.e it's index when counting all residues
+            starting from one in same order they appear in the pdb file.
+            the indices are global among chains of same protein
+            """
+            true_index = 0
+            for residue in struct.get_residues():
+                if not is_protein_residue(residue):
+                    continue
+                residue.true_index = true_index
+                true_index += 1
+
+        if self._neighbours:
+            return self._neighbours
+
+        add_true_residue_indexes(self.receptor)
+        add_true_residue_indexes(self.ligand)
+        ligand_atoms = list(self.ligand.get_atoms())
+        receptor_atoms = list(self.receptor.get_atoms())
+
+        nb = NeighborSearch(ligand_atoms + receptor_atoms)
+        all_neighbours = nb.search_all(neighbor_radius, level='R')
+
+        neighbor_indexes = []
+
+        for residue_neighbor_A, residue_neighbor_B in all_neighbours:
+            neighbor_A_struct_id, neighbor_B_struct_id = residue_neighbor_A.get_full_id()[0], \
+                                                         residue_neighbor_B.get_full_id()[0]
+
+            if neighbor_A_struct_id == neighbor_B_struct_id:  # means both from receptor or both from ligand
+                continue
+            # one of the residues is not animo-acid
+            if not is_protein_residue(residue_neighbor_A) or not is_protein_residue(residue_neighbor_B):
+                continue
+
+            if neighbor_A_struct_id == RECEPTOR_STRUCT_ID:
+                receptor_residue, ligand_residue = residue_neighbor_A, residue_neighbor_B
+            else:
+                receptor_residue, ligand_residue = residue_neighbor_B, residue_neighbor_A
+
+            neighbor_indexes.append((receptor_residue.true_index, ligand_residue.true_index))
+
+        self._neighbours = neighbor_indexes
+        return self._neighbours
+
     @staticmethod
     def get_structure_sequence(struct):
         # type: (Structure) -> str
@@ -77,52 +139,6 @@ class Complex(object):
         if not hasattr(self, attr_str) or getattr(self, attr_str, None) is None:
             init_fn()
         return getattr(self, attr_str)
-
-    def _add_true_residue_indexes(self):
-        '''
-        adds for each residue (or ligand ot receptor) a 'true' index, i.e it's index when counting all residues
-        starting from one in same order they appear in the pdb file.  the indices are global among chains of same protein
-        '''
-        for i, residue in enumerate(self.ligand.get_residues()):
-            residue.true_index = i
-
-        for i, residue in enumerate(self.receptor.get_residues()):
-            residue.true_index = i
-
-    def get_neighbours_residues(self, neighbor_radius=NEIHGBOR_RADIUS):
-        # type: () -> lst((int, int),...)
-        '''
-        :return: list of tuples (receptor_residue_index, ligand_residue_index) in which the euclidean distance
-                 between them is at most $(NEIGHBOURS_RADIUS)
-        '''
-        if self._neighbours:
-            return self._neighbours
-
-        self._add_true_residue_indexes()
-        ligand_atoms = list(self.ligand.get_atoms())
-        receptor_atoms = list(self.receptor.get_atoms())
-
-        nb = NeighborSearch(ligand_atoms + receptor_atoms)
-        all_neighbours = nb.search_all(neighbor_radius, level='R')
-
-        neighbor_indexes = []
-
-        for residue_neighbor_A, residue_neighbor_B in all_neighbours:
-            neighbor_A_struct_id, neighbor_B_struct_id = residue_neighbor_A.get_full_id()[0], \
-                                                         residue_neighbor_B.get_full_id()[0]
-
-            if neighbor_A_struct_id == neighbor_B_struct_id:  # means both from receptor or both from ligand
-                continue
-
-            if neighbor_A_struct_id == RECEPTOR_STRUCT_ID:
-                receptor_residue, ligand_residue = residue_neighbor_A, residue_neighbor_B
-            else:
-                receptor_residue, ligand_residue = residue_neighbor_B, residue_neighbor_A
-
-            neighbor_indexes.append((receptor_residue.true_index, ligand_residue.true_index))
-
-        self._neighbours = neighbor_indexes
-        return self._neighbours
 
     def _cache_complex(self):
         c_path = self._get_cache_path()

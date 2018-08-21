@@ -17,8 +17,8 @@ print("original ranking capri score: {}".format(original_score))
 print("rerank capri score: {}".format(rerank_score))
 
 
-fnat_before_ranking = helper.get_all_fnat_scores_reranking(False)
-fnat_after_ranking = helper.get_all_fnat_scores_reranking(True)
+fnat_before_ranking = helper.get_all_fnat_scores(after=False)
+fnat_after_ranking = helper.get_all_fnat_scores(after=True)
 
 print("fnat scores before reranking: {}".format(fnat_before_ranking))
 print("fnat scores after reranking: {}".format(fnat_after_ranking))

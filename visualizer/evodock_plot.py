@@ -24,8 +24,8 @@ def plot_rank_to_fnat(result_helper, accumulate=False):
 
     top = 10
     x = np.arange(10) + 1
-    original_fnat_scores = process_scores(result_helper.get_all_fnat_scores_reranking(False, top))
-    reranked_fnat_scores = process_scores(result_helper.get_all_fnat_scores_reranking(True, top))
+    original_fnat_scores = process_scores(result_helper.get_all_fnat_scores(False, top))
+    reranked_fnat_scores = process_scores(result_helper.get_all_fnat_scores(True, top))
 
     plt.ylim(ymin=0.0, ymax=max(np.max(original_fnat_scores), np.max(reranked_fnat_scores)) + 0.05)
     plt.scatter(x, original_fnat_scores, c='b')
@@ -42,7 +42,7 @@ def plot_raptor_to_fnat(result_helper):
     :return: None
     """
     raptor_scores = np.array(result_helper.get_all_ranked_expectation_scores()).flatten()
-    fnat_scores = np.array(result_helper.get_all_fnat_scores_reranking(True)).flatten()
+    fnat_scores = np.array(result_helper.get_all_fnat_scores(True)).flatten()
     # regression line
     slope, intercept, r_value, p_value, std_err = stats.linregress(raptor_scores, fnat_scores)
     line = slope * raptor_scores + intercept
