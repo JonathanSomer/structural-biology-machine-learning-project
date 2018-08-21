@@ -31,8 +31,11 @@ def plot_rank_to_fnat(result_helper, accumulate=False):
     reranked_fnat_scores = process_scores(result_helper.get_all_fnat_scores(True, top))
 
     plt.ylim(ymin=0.0, ymax=max(np.max(original_fnat_scores), np.max(reranked_fnat_scores)) + 0.05)
-    plt.scatter(x, original_fnat_scores, c='b')
-    plt.scatter(x, reranked_fnat_scores, c='r', marker='X')
+    plt.scatter(x, original_fnat_scores, c='b', label='Original Ranking')
+    plt.scatter(x, reranked_fnat_scores, c='r', marker='X', label='Reranked')
+    plt.legend(fontsize=9)
+    plt.xlabel('Docking Rank')
+    plt.ylabel('fnat')
     plt.show()
 
 
@@ -52,12 +55,14 @@ def plot_raptor_to_fnat(result_helper):
         plt.plot(x, line, 'r', label='y={:.3f}x+{:.3f} (R2={:.2f})'.format(slope, intercept, r_value))
 
     raptor_scores = np.array(result_helper.get_all_ranked_expectation_scores()).flatten()
-    fnat_scores = np.array(result_helper.get_all_fnat_scores(True)).flatten()
+    fnat_scores = np.array(result_helper.get_all_fnat_scores(after=True)).flatten()
 
     plt.scatter(raptor_scores, fnat_scores, c='b')
     create_regression_line(raptor_scores, fnat_scores)
     create_regression_line(raptor_scores[fnat_scores > 0], fnat_scores[fnat_scores > 0])
     plt.legend(fontsize=9)
+    plt.xlabel('RaptorX Score')
+    plt.ylabel('fnat')
     plt.show()
 
 
@@ -93,7 +98,7 @@ def plot_average_raptor_score_in_binding_site_vs_not(trim=0.01):
     plt.bar(_X - 0.2, average_raptor_scores_for_neighbors, 0.2)
     plt.bar(_X + 0.0, average_raptor_scores_for_non_neighbors, 0.2)
     plt.xticks(_X, complex_ids, rotation=45)  # set labels manually
-    plt.legend(['average_raptor_score_for_neighbors', 'average_raptor_score_for_non_neighbors'],loc=1)
+    plt.legend(['average_raptor_score_for_neighbors', 'average_raptor_score_for_non_neighbors'], loc=1)
     plt.xlabel('Complex ID', fontsize=16)
     plt.ylabel('Average Raptor Score', fontsize=16)
     plt.show()
@@ -103,16 +108,18 @@ def plot_average_raptor_score_in_binding_site_vs_not(trim=0.01):
     no_improvement_complex_ids = [c for c in complex_ids if c not in improvement_complex_ids]
 
     explode = (0, 0.1)
-    plt.pie(x=[len(no_improvement_complex_ids), len(improvement_complex_ids)], explode=explode, shadow=True, autopct='%1.1f%%')
+    plt.pie(x=[len(no_improvement_complex_ids), len(improvement_complex_ids)], explode=explode, shadow=True,
+            autopct='%1.1f%%')
     plt.legend(['average raptor score lower in binding site', 'average raptor score higher in binding site'], loc=2)
     plt.show()
 
-def plot_fnat_above_treshold_per_complex(result_helper, treshold=FnatThresholds.Acceptable):
+
+def plot_fnat_above_threshold_per_complex(result_helper, threshold=FnatThresholds.Acceptable):
     fnat_before = np.array(result_helper.get_all_fnat_scores(after=False, top=TOP_RESULTS_COUNTS_FOR_CAPRI))
     fnat_after = np.array(result_helper.get_all_fnat_scores(after=True, top=TOP_RESULTS_COUNTS_FOR_CAPRI))
 
-    above_before = np.array([len(scores[scores > treshold]) for scores in fnat_before])
-    above_after = np.array([len(scores[scores > treshold]) for scores in fnat_after])
+    above_before = np.array([len(scores[scores > threshold]) for scores in fnat_before])
+    above_after = np.array([len(scores[scores > threshold]) for scores in fnat_after])
 
     sorted_indices = above_before.argsort()[::-1]
     above_before = above_before[sorted_indices]
@@ -123,6 +130,7 @@ def plot_fnat_above_treshold_per_complex(result_helper, treshold=FnatThresholds.
     plt.xlabel("complexes")
     plt.ylabel("acceptable count")
     plt.show()
+
 
 def plot_max_patchdock_fnat_scores(result_helper, top=None):
     max_fnats_bound = np.array([max(fnats) for fnats
@@ -136,8 +144,9 @@ def plot_max_patchdock_fnat_scores(result_helper, top=None):
 
     plt.plot(max_fnats_bound, 'bo')
     plt.plot(max_fnats_unbound, 'rx')
-    plt.plot([FnatThresholds.Acceptable for dot in max_fnats_bound]) #treshold line
+    plt.plot([FnatThresholds.Acceptable for dot in max_fnats_bound])  # treshold line
     plt.show()
+
 
 def plot_fnat_of_unbound(ids=TRAIN_COMPLEX_IDS):
     unbounds = [BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_unbound)
@@ -148,7 +157,7 @@ def plot_fnat_of_unbound(ids=TRAIN_COMPLEX_IDS):
     unbound_fnats = [get_fnat_score(unbound, bound) for unbound, bound in zip(unbounds, bounds)]
     unbound_fnats.sort(reverse=True)
 
-    plt.plot([FnatThresholds.Acceptable for dot in unbound_fnats]) #treshold line
+    plt.plot([FnatThresholds.Acceptable for dot in unbound_fnats])  # treshold line
     plt.plot(unbound_fnats, 'bo')
     plt.ylabel("fnat of unbound")
     plt.xlabel("complexs")

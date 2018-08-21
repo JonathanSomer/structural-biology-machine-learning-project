@@ -5,7 +5,6 @@ complex_ids = TRAIN_COMPLEX_IDS
 recache = False
 n_of_patchdock_results = 200
 
-comp = None
 for complex_id in complex_ids:
     print("Caching %s" % complex_id)
     BenchmarkComplex(complex_id, ComplexType.zdock_benchmark_unbound, recache)
