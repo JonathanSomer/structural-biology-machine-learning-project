@@ -11,6 +11,7 @@ from utils import raptorx_utils
 from Constants import *
 from utils.capri_utils import FnatThresholds
 
+
 def plot_rank_to_fnat(result_helper, accumulate=False):
     # type: (ResultsHelper) -> None
     """
@@ -18,6 +19,7 @@ def plot_rank_to_fnat(result_helper, accumulate=False):
     :param result_helper: ResultsHelper with the data to plot
     :return: None
     """
+
     def process_scores(scores):
         if accumulate:
             scores = np.maximum.accumulate(scores, axis=1)
@@ -42,21 +44,26 @@ def plot_raptor_to_fnat(result_helper):
     :param result_helper: ResultsHelper with the data to plot
     :return: None
     """
+
+    def create_regression_line(x, y):
+        # regression line
+        slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+        line = slope * x + intercept
+        plt.plot(x, line, 'r', label='y={:.3f}x+{:.3f} (R2={:.2f})'.format(slope, intercept, r_value))
+
     raptor_scores = np.array(result_helper.get_all_ranked_expectation_scores()).flatten()
     fnat_scores = np.array(result_helper.get_all_fnat_scores(True)).flatten()
-    # regression line
-    slope, intercept, r_value, p_value, std_err = stats.linregress(raptor_scores, fnat_scores)
-    line = slope * raptor_scores + intercept
 
     plt.scatter(raptor_scores, fnat_scores, c='b')
-    plt.plot(raptor_scores, line, 'r', label='y={:.3f}x+{:.3f} (R2={:.2f})'.format(slope, intercept, r_value))
+    create_regression_line(raptor_scores, fnat_scores)
+    create_regression_line(raptor_scores[fnat_scores > 0], fnat_scores[fnat_scores > 0])
     plt.legend(fontsize=9)
     plt.show()
 
-# from visualizer.evodock_plot import *
-# plot_average_raptor_score_in_binding_site_vs_not()
+
 def plot_average_raptor_score_in_binding_site_vs_not(trim=0.01):
-    bound_complexes = [cmp.BenchmarkComplex(complex_id=complex_id, type=cmp.ComplexType.zdock_benchmark_bound) for complex_id in TRAIN_COMPLEX_IDS]
+    bound_complexes = [cmp.BenchmarkComplex(complex_id=complex_id, type=cmp.ComplexType.zdock_benchmark_bound) for
+                       complex_id in TRAIN_COMPLEX_IDS]
 
     complex_ids = np.array([bound_complex.complex_id for bound_complex in bound_complexes])
     average_raptor_scores_for_neighbors, average_raptor_scores_for_non_neighbors = [], []
@@ -91,7 +98,8 @@ def plot_average_raptor_score_in_binding_site_vs_not(trim=0.01):
     plt.ylabel('Average Raptor Score', fontsize=16)
     plt.show()
 
-    improvement_complex_ids = complex_ids[np.greater(average_raptor_scores_for_neighbors, average_raptor_scores_for_non_neighbors)]
+    improvement_complex_ids = complex_ids[
+        np.greater(average_raptor_scores_for_neighbors, average_raptor_scores_for_non_neighbors)]
     no_improvement_complex_ids = [c for c in complex_ids if c not in improvement_complex_ids]
 
     explode = (0, 0.1)
