@@ -11,7 +11,6 @@ from utils import raptorx_utils
 from Constants import *
 from utils.capri_utils import FnatThresholds
 
-
 def plot_rank_to_fnat(result_helper, accumulate=False):
     # type: (ResultsHelper) -> None
     """
@@ -42,25 +41,16 @@ def plot_raptor_to_fnat(result_helper):
     :param result_helper: ResultsHelper with the data to plot
     :return: None
     """
-
-    def create_regression_line(x, y):
-        # regression line
-        slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
-        line = slope * x + intercept
-        plt.plot(x, line, 'r', label='y={:.3f}x+{:.3f} (R2={:.2f})'.format(slope, intercept, r_value))
-
     raptor_scores = np.array(result_helper.get_all_ranked_expectation_scores()).flatten()
-    fnat_scores = np.array(result_helper.get_all_fnat_scores(after=True)).flatten()
+    fnat_scores = np.array(result_helper.get_all_fnat_scores(True)).flatten()
+    # regression line
+    slope, intercept, r_value, p_value, std_err = stats.linregress(raptor_scores, fnat_scores)
+    line = slope * raptor_scores + intercept
 
     plt.scatter(raptor_scores, fnat_scores, c='b')
-    create_regression_line(raptor_scores, fnat_scores)
-    create_regression_line(raptor_scores[fnat_scores > 0], fnat_scores[fnat_scores > 0])
+    plt.plot(raptor_scores, line, 'r', label='y={:.3f}x+{:.3f} (R2={:.2f})'.format(slope, intercept, r_value))
     plt.legend(fontsize=9)
-    plt.xlabel('RaptorX Score')
-    plt.ylabel('fnat')
     plt.show()
-
-
 
 # from visualizer.evodock_plot import *
 # plot_average_raptor_score_in_binding_site_vs_not()
@@ -143,9 +133,7 @@ def plot_max_patchdock_fnat_scores(result_helper, top=None):
     plt.ylabel("max fnat score for all patchdock results")
     plt.show()
 
-
 def plot_fnat_of_unbound(ids=TRAIN_COMPLEX_IDS):
-
     unbounds = [BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_unbound)
                 for complex_id in ids]
     bounds = [BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_bound)
@@ -158,7 +146,7 @@ def plot_fnat_of_unbound(ids=TRAIN_COMPLEX_IDS):
     plt.plot(unbound_fnats, 'bo')
     plt.ylabel("fnat of unbound")
     plt.xlabel("complexs")
-
+    plt.show()
 
 def raptor_to_fnat_plot_per_complex(result_helper):
 
