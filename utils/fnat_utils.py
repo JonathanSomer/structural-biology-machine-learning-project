@@ -1,9 +1,9 @@
 from Bio import pairwise2
 from objects.complex import *
 
-def get_fnat_score(estimated_complex, banchmark_complex):
-    return float(len(_intersect_neighbours_between_complexes(estimated_complex, banchmark_complex)) /
-                 float(len(banchmark_complex.get_neighbours_residues())))
+def get_fnat_score(estimated_complex, benchmark_complex):
+    return float(len(_intersect_neighbours_between_complexes(estimated_complex, benchmark_complex)) /
+                 float(len(benchmark_complex.get_neighbours_residues())))
 
 def _intersect_neighbours_between_complexes(c1, c2):
     neighbours_c1, neighbours_c2 = set(c1.get_neighbours_residues()), set(c2.get_neighbours_residues())
@@ -15,15 +15,16 @@ def _intersect_neighbours_between_complexes(c1, c2):
     return joint_neighbors
 
 def get_position_map_between_sequences(seq1, seq2):
-    '''
+    """
     :return: a map from residues indices of seq1 to indices in seq2 corresponding to their pairwise alignment
-    '''
+    """
     alignments = pairwise2.align.globalxx(seq1, seq2)
     return _get_position_map_from_alignment(*alignments[0])
 
 
 def _get_position_map_from_alignment(align1, align2, score, begin, end):
-    """format_alignment(align1, align2, score, begin, end) -> string
+    """
+    format_alignment(align1, align2, score, begin, end) -> string
     Format the alignment prettily into a list of tuples of the identical residues.
     """
     index_map = {}

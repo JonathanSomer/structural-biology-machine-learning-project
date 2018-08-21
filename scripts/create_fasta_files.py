@@ -12,7 +12,6 @@ warnings.simplefilter('ignore', PDBConstructionWarning)
 from utils import pdb_utils
 
 sanity_check = True
-check_patch_dock_seq = True
 
 base_path = os.path.abspath(os.pardir)
 if sanity_check:
@@ -36,8 +35,7 @@ def copy_benchmark_pdb(complex_id, complex_benchmark_path, ligand=True, bound=Tr
     if not os.path.exists(complex_benchmark_path):
         os.makedirs(complex_benchmark_path)
     complex_pdb_path = os.path.join(complex_benchmark_path, os.path.basename(pdb_path))
-    if not os.path.exists(complex_pdb_path):
-        shutil.copy(pdb_path, complex_benchmark_path)
+    shutil.copy(pdb_path, complex_benchmark_path)
     return complex_pdb_path
 
 

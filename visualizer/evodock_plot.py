@@ -6,21 +6,30 @@ import numpy as np
 import scipy.stats as stats
 
 from objects import complex as cmp
-from objects.complex import *
 from objects.pipeline_handler import ResultsHelper
 from utils import pdb_utils, raptorx_utils
 from Constants import *
 
-from scipy import stats
+def plot_rank_to_fnat(result_helper, accumulate=False):
+    # type: (ResultsHelper) -> None
+    """
+    Scatter plot of (rank, fnat score) points for top10 patchdock results in result_helper before and after reranking
+    :param result_helper: ResultsHelper with the data to plot
+    :return: None
+    """
+    def process_scores(scores):
+        if accumulate:
+            scores = np.maximum.accumulate(scores, axis=1)
+        return np.average(scores, axis=0)
 
-def plot_rank_to_fnat(complexes):
-    # type: (List[complex.Complex]) -> None
-    plt.figure(0)
-    new_ranks = range(0, len(complexes))
-    original_ranks = [complex.original_rank for complex in complexes]
-    capri_scores = [random.random() for complex in complexes]
-    plt.scatter(new_ranks, capri_scores, c='b')
-    plt.scatter(original_ranks, capri_scores, c='r')
+    top = 10
+    x = np.arange(10) + 1
+    original_fnat_scores = process_scores(result_helper.get_all_fnat_scores(False, top))
+    reranked_fnat_scores = process_scores(result_helper.get_all_fnat_scores(True, top))
+
+    plt.ylim(ymin=0.0, ymax=max(np.max(original_fnat_scores), np.max(reranked_fnat_scores)) + 0.05)
+    plt.scatter(x, original_fnat_scores, c='b')
+    plt.scatter(x, reranked_fnat_scores, c='r', marker='X')
     plt.show()
 
 
@@ -29,11 +38,11 @@ def plot_raptor_to_fnat(result_helper):
     """
     Scatter plot of (raptor score, fnat score) points for each patchdock results in result_helper
     Also adds a regression line
-    :param result_helper:
-    :return:
+    :param result_helper: ResultsHelper with the data to plot
+    :return: None
     """
     raptor_scores = np.array(result_helper.get_all_ranked_expectation_scores()).flatten()
-    fnat_scores = np.array(result_helper.get_all_fnat_scores_after_reranking()).flatten()
+    fnat_scores = np.array(result_helper.get_all_fnat_scores(True)).flatten()
     # regression line
     slope, intercept, r_value, p_value, std_err = stats.linregress(raptor_scores, fnat_scores)
     line = slope * raptor_scores + intercept
@@ -46,11 +55,11 @@ def plot_raptor_to_fnat(result_helper):
 # from visualizer.evodock_plot import *
 # plot_average_raptor_score_in_binding_site_vs_not()
 def plot_average_raptor_score_in_binding_site_vs_not(trim=0.01):
-    bound_complexes = [BenchmarkComplex(complex_id=complex_id, type=ComplexType.zdock_benchmark_bound) for complex_id in TRAIN_COMPLEX_IDS]
+    bound_complexes = [cmp.BenchmarkComplex(complex_id=complex_id, type=cmp.ComplexType.zdock_benchmark_bound) for complex_id in TRAIN_COMPLEX_IDS]
 
     complex_ids = np.array([bound_complex.complex_id for bound_complex in bound_complexes])
     average_raptor_scores_for_neighbors, average_raptor_scores_for_non_neighbors = [], []
-    
+
     for bound_complex in bound_complexes:
         complex_id = bound_complex.complex_id
 

@@ -1,3 +1,4 @@
+from Constants import *
 from Reranker.reranker import RaptorxReranker, RaptorXScoringMethod
 from objects.pipeline_handler import ResultsHelper
 from visualizer import evodock_plot as plot
@@ -16,8 +17,8 @@ print("original ranking capri score: {}".format(original_score))
 print("rerank capri score: {}".format(rerank_score))
 
 
-fnat_before_ranking = helper.get_all_fnat_scores_before_reranking()
-fnat_after_ranking = helper.get_all_fnat_scores_after_reranking()
+fnat_before_ranking = helper.get_all_fnat_scores(after=False)
+fnat_after_ranking = helper.get_all_fnat_scores(after=True)
 
 print("fnat scores before reranking: {}".format(fnat_before_ranking))
 print("fnat scores after reranking: {}".format(fnat_after_ranking))
