@@ -14,7 +14,7 @@ warnings.simplefilter('ignore', PDBConstructionWarning)
 NEIHGBOR_RADIUS = 8.0
 LIGAND_STRUCT_ID = 'ligand'
 RECEPTOR_STRUCT_ID = 'receptor'
-
+N_PATCH_DOCK_SCORE_COMPONENTS = 4
 
 class ComplexType(Enum):
     zdock_benchmark_bound = 1

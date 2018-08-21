@@ -26,11 +26,11 @@ def _get_capri_score_for_estimated_complex(estimated_complex, banchmark_complex)
     return _get_capri_score_from_fnat(fnat)
 
 def _get_capri_score_from_fnat(fnat):
-    if fnat > FnatThresholds.High:
-        return CapriAcceptanceLevelScores.High
-    elif fnat > FnatThresholds.Medium:
-        return CapriAcceptanceLevelScores.Medium
-    elif fnat > FnatThresholds.Acceptable:
-        return CapriAcceptanceLevelScores.Acceptable
+    if fnat > FnatThresholds.High.value:
+        return CapriAcceptanceLevelScores.High.value
+    elif fnat > FnatThresholds.Medium.value:
+        return CapriAcceptanceLevelScores.Medium.value
+    elif fnat > FnatThresholds.Acceptable.value:
+        return CapriAcceptanceLevelScores.Acceptable.value
     else:
-        return CapriAcceptanceLevelScores.Incorrect
+        return CapriAcceptanceLevelScores.Incorrect.value

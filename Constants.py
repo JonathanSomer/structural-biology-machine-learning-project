@@ -9,6 +9,8 @@ BASE_DATA_PATH = "data"
 
 # ids for complexes with all data ready
 
+ACCEPTED_COMPLEXES = ['1CGI', '1KXQ', '1ACB', '1AVX', '1M10', '2W9E']
+
 TRAIN_COMPLEX_IDS = ['1ACB', '1AVX', '1CGI', '1FSK', '1I9R', '1IJK', '1IQD', '1KXQ', '1M10', '1NCA',
                      '1QFW', '1R6Q', '2FD6', '2I25', '2JEL', '2VXT', '2W9E', '3EOA', '3HMX', '3L5W',
                      '3MXW', '3RVW', '3V6Z', '4DN4', '4G6M']
@@ -47,3 +49,6 @@ def get_zdock_benchmark_cache_path(complex_id, bound=True):
     base_path = os.path.join(BASE_DATA_PATH, complex_id, "benchmark")
     file_name = "{}_{}_cache.json".format(complex_id, 'b' if bound else 'u')
     return os.path.join(base_path, file_name)
+
+def get_file_from_ml_models_path(file_name):
+    return os.path.join(BASE_DATA_PATH, "ml_models", file_name)
