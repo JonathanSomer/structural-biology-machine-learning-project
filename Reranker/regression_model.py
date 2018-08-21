@@ -11,7 +11,8 @@ import pickle
 
 warnings.simplefilter('ignore', PDBConstructionWarning)
 
-TRAIN_FEATURES_AND_LABELS_PICKLE = 'features_and_labels.pickle'
+TRAIN_FEATURES_AND_LABELS_PICKLE_5 = 'features_and_labels_radius_5.pickle'
+TRAIN_FEATURES_AND_LABELS_PICKLE_8 = 'features_and_labels_radius_8.pickle'
 NON_ZERO_FNAT_CLASSIFIER_PICKLE = 'non_zero_fnat_classifier.pickle'
 FNAT_REGRESSOR_PICKLE = 'fnat_regressor.pickle'
 
@@ -26,10 +27,10 @@ def get_features_and_labels(use_training_data=True):
 
 	for complex_id in ids:
 
-		benchmark_complex = BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_bound)
+		benchmark_complex = BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_bound, re_cache=True)
 
 		for rank in range(1, NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX + 1):
-			patch_dock_complex = PatchDockComplex(complex_id, rank)
+			patch_dock_complex = PatchDockComplex(complex_id, rank, re_cache=True)
 
 			features = get_patch_dock_complex_features(patch_dock_complex)
 			target = get_fnat_score(patch_dock_complex, benchmark_complex)
@@ -44,7 +45,7 @@ def get_features_and_labels(use_training_data=True):
 def get_patch_dock_complex_features(patch_dock_complex, include_raptor_score=True):
 			features = patch_dock_complex.score_components
 			
-			raptor_matrix = get_raptorx_matrix(complex_id)
+			raptor_matrix = get_raptorx_matrix(patch_dock_complex.complex_id)
 			neighbor_indexes = patch_dock_complex.get_neighbours_residues()
 
 			if include_raptor_score:
@@ -54,7 +55,7 @@ def get_patch_dock_complex_features(patch_dock_complex, include_raptor_score=Tru
 			return features
 
 def load_features_and_continuous_labels(non_zero_data_only=True):
-	with open(get_file_from_ml_models_path(TRAIN_FEATURES_AND_LABELS_PICKLE), "rb") as f:
+	with open(get_file_from_ml_models_path(TRAIN_FEATURES_AND_LABELS_PICKLE_8), "rb") as f:
 		data = pickle.load(f)
 		X = np.array(data['X'])
 		y = np.array(data['y'])
@@ -66,7 +67,7 @@ def load_features_and_continuous_labels(non_zero_data_only=True):
 		return X, y 
 
 def load_features_and_binary_labels():
-	with open(get_file_from_ml_models_path(TRAIN_FEATURES_AND_LABELS_PICKLE), "rb") as f:
+	with open(get_file_from_ml_models_path(TRAIN_FEATURES_AND_LABELS_PICKLE_8), "rb") as f:
 		data = pickle.load(f)
 		X = data['X']
 		y = ~np.equal(np.array(data['y']), 0.0)

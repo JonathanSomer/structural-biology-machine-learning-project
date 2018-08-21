@@ -11,7 +11,7 @@ import re
 
 warnings.simplefilter('ignore', PDBConstructionWarning)
 
-NEIHGBOR_RADIUS = 5
+NEIHGBOR_RADIUS = 8.0
 LIGAND_STRUCT_ID = 'ligand'
 RECEPTOR_STRUCT_ID = 'receptor'
 
