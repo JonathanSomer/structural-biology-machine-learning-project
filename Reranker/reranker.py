@@ -12,8 +12,12 @@ class RaptorXScoringMethod(Enum):
     """
     Enum for various scoring methods
     """
-    log_likelihood = 1  # sum of log probablities
-    likelihood = 2  # multiply probabilities
+    log_likelihood = "sum of log likelihood"  # sum of log probablities
+    likelihood = "sum of likelihood"  # multiply probabilities
+    percentage = "cutoff by percentile" # cutoff percentage
+    sqrt_sum = "sum of sqrt"
+    cbrt_sum = "sum of cube"
+    norm = "norm" # euclidean distance
 
 
 class Reranker(object):
@@ -26,13 +30,14 @@ class Reranker(object):
 
 class RaptorxReranker(Reranker):
 
-    def __init__(self, scoring_method, prob_trim=0.2):
+    def __init__(self, scoring_method, prob_trim=0.2, method_arg=None):
         """
         :param scoring_method: See utils.raptorx_utils.get_raptorx_score for details
         :param prob_trim: See utils.raptorx_utils.get_raptorx_score for details
         """
         self.scoring_method = scoring_method
         self.prob_trim = prob_trim
+        self._method_arg = method_arg
 
     @staticmethod
     def get_raptorx_matrix(complex_id, filepath=None, desired_shape=None):
@@ -70,7 +75,7 @@ class RaptorxReranker(Reranker):
         return raptorx_mat
 
     @staticmethod
-    def get_raptorx_score(raptorx_mat, neighbour_indices, method, trim):
+    def get_raptorx_score(raptorx_mat, neighbour_indices, method, trim, arg):
         # type: (np.ndarray, Iterable[Tuple[int, int]], RaptorXScoringMethod, float) -> float
         """
         Returns score based on raptorx matrix with the given score method.
@@ -89,6 +94,16 @@ class RaptorxReranker(Reranker):
             return np.sum(np.log(neighbour_scores))
         elif method == RaptorXScoringMethod.likelihood:
             return np.prod(neighbour_scores)
+        elif method == RaptorXScoringMethod.percentage:
+            cutoff_value = np.percentile(raptorx_mat.flatten(), arg)
+            print(cutoff_value)
+            return len(neighbour_scores[neighbour_scores >= cutoff_value])
+        elif method == RaptorXScoringMethod.sqrt_sum:
+            return np.sum(np.sqrt(neighbour_scores))
+        elif method == RaptorXScoringMethod.cbrt_sum:
+            return np.sum(np.cbrt(neighbour_scores))
+        elif method == RaptorXScoringMethod.norm:
+            return np.linalg.norm(neighbour_scores)
 
     def rerank(self, complexes, detailed_return=False):
         # type: (self, List[complex.Complex]) -> Union[List[complex.Complex], List[complex.Complex, int, float]]
@@ -112,7 +127,8 @@ class RaptorxReranker(Reranker):
         ranks = []
         for i, res_complex in enumerate(complexes):
             neighbours = res_complex.get_neighbours_residues()
-            score = float(RaptorxReranker.get_raptorx_score(rapt_mat, neighbours, self.scoring_method, self.prob_trim))
+            score = float(RaptorxReranker.get_raptorx_score(rapt_mat, neighbours, self.scoring_method, self.prob_trim,
+                                                            self._method_arg))
             ranks.append((i, score))
         ranks = sorted(ranks, key=lambda rank: rank[1], reverse=True)
         if detailed_return:

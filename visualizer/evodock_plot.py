@@ -11,6 +11,7 @@ from utils import raptorx_utils
 from Constants import *
 from utils.capri_utils import FnatThresholds
 
+
 def plot_rank_to_fnat(result_helper, accumulate=False):
     # type: (ResultsHelper) -> None
     """
@@ -33,7 +34,6 @@ def plot_rank_to_fnat(result_helper, accumulate=False):
     plt.scatter(x, reranked_fnat_scores, c='r', marker='X')
     plt.show()
 
-
 def plot_raptor_to_fnat(result_helper):
     # type: (ResultsHelper) -> None
     """
@@ -42,16 +42,25 @@ def plot_raptor_to_fnat(result_helper):
     :param result_helper: ResultsHelper with the data to plot
     :return: None
     """
+
+    def create_regression_line(x, y):
+        # regression line
+        slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+        line = slope * x + intercept
+        plt.plot(x, line, 'r', label='y={:.3f}x+{:.3f} (R2={:.2f})'.format(slope, intercept, r_value))
+
     raptor_scores = np.array(result_helper.get_all_ranked_expectation_scores()).flatten()
-    fnat_scores = np.array(result_helper.get_all_fnat_scores(True)).flatten()
-    # regression line
-    slope, intercept, r_value, p_value, std_err = stats.linregress(raptor_scores, fnat_scores)
-    line = slope * raptor_scores + intercept
+    fnat_scores = np.array(result_helper.get_all_fnat_scores(after=True)).flatten()
 
     plt.scatter(raptor_scores, fnat_scores, c='b')
-    plt.plot(raptor_scores, line, 'r', label='y={:.3f}x+{:.3f} (R2={:.2f})'.format(slope, intercept, r_value))
+    create_regression_line(raptor_scores, fnat_scores)
+    create_regression_line(raptor_scores[fnat_scores > 0], fnat_scores[fnat_scores > 0])
     plt.legend(fontsize=9)
+    plt.xlabel('RaptorX Score')
+    plt.ylabel('fnat')
     plt.show()
+
+
 
 # from visualizer.evodock_plot import *
 # plot_average_raptor_score_in_binding_site_vs_not()
@@ -134,7 +143,9 @@ def plot_max_patchdock_fnat_scores(result_helper, top=None):
     plt.ylabel("max fnat score for all patchdock results")
     plt.show()
 
+
 def plot_fnat_of_unbound(ids=TRAIN_COMPLEX_IDS):
+
     unbounds = [BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_unbound)
                 for complex_id in ids]
     bounds = [BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_bound)
@@ -147,4 +158,30 @@ def plot_fnat_of_unbound(ids=TRAIN_COMPLEX_IDS):
     plt.plot(unbound_fnats, 'bo')
     plt.ylabel("fnat of unbound")
     plt.xlabel("complexs")
+
+
+def raptor_to_fnat_plot_per_complex(result_helper):
+
+    all_raptor_scores = result_helper.get_all_ranked_expectation_scores()
+    all_fnat_scores = result_helper.get_all_fnat_scores(after=True)
+    n_plots = len(result_helper.complex_ids)
+
+    for i, raptor_scores, fnat_scores in zip(range(n_plots), all_raptor_scores, all_fnat_scores):
+        raptor_scores_top10, fnat_scores_top_10 = raptor_scores[:10], fnat_scores[:10]
+
+        # regression line
+        slope, intercept, r_value, p_value, std_err = stats.linregress(raptor_scores, fnat_scores)
+        line = slope * raptor_scores + intercept
+
+        plt.subplot(2, n_plots/2 + n_plots%2, i+1)
+
+        plt.plot([FnatThresholds.Acceptable for dot in range(max(np.array(raptor_scores_top10).astype(int)))]) #treshold line
+        plt.scatter(raptor_scores, fnat_scores, c='b')
+        plt.scatter(raptor_scores_top10, fnat_scores_top_10, c='r')
+        plt.plot(raptor_scores, line, 'r',
+                 label='y={:.3f}x+{:.3f} (R2={:.2f})'.format(slope, intercept, r_value))
+        plt.legend(fontsize=9)
+        plt.title(result_helper.complex_ids[i])
+
+    plt.suptitle("fant over {} raptor scores".format(result_helper.reranker.scoring_method))
     plt.show()
