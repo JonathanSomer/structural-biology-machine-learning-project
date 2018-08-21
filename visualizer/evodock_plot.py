@@ -114,6 +114,7 @@ def plot_fnat_above_treshold_per_complex(result_helper, treshold=FnatThresholds.
     plt.ylabel("acceptable count")
     plt.show()
 
+
 def plot_max_patchdock_fnat_scores(result_helper, top=None):
     max_fnats_bound = np.array([max(fnats) for fnats
                                 in result_helper.get_all_fnat_scores(after=False, top=top, bound=True)])
@@ -123,10 +124,14 @@ def plot_max_patchdock_fnat_scores(result_helper, top=None):
     sorted_indices = max_fnats_bound.argsort()[::-1]
     max_fnats_bound = max_fnats_bound[sorted_indices]
     max_fnats_unbound = max_fnats_unbound[sorted_indices]
+    ids = np.array(result_helper.complex_ids)[sorted_indices]
 
-    plt.plot(max_fnats_bound, 'bo')
-    plt.plot(max_fnats_unbound, 'rx')
+    plt.plot(max_fnats_bound, 'bo', label="bound")
+    plt.plot(max_fnats_unbound, 'rx', label="unbound")
     plt.plot([FnatThresholds.Acceptable for dot in max_fnats_bound]) #treshold line
+    plt.xticks(np.arange(len(ids)), ids, rotation=45)
+    plt.xlabel("complex id")
+    plt.ylabel("max fnat score for all patchdock results")
     plt.show()
 
 def plot_fnat_of_unbound(ids=TRAIN_COMPLEX_IDS):
