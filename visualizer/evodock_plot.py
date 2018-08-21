@@ -84,14 +84,16 @@ def plot_average_raptor_score_in_binding_site_vs_not(trim=0.01):
     plt.figure(0)
     plt.bar(_X - 0.2, average_raptor_scores_for_neighbors, 0.2)
     plt.bar(_X + 0.0, average_raptor_scores_for_non_neighbors, 0.2)
-    plt.xticks(_X, complex_ids)  # set labels manually
-
+    plt.xticks(_X, complex_ids, rotation=45)  # set labels manually
+    plt.legend(['average_raptor_score_for_neighbors', 'average_raptor_score_for_non_neighbors'],loc=1)
+    plt.xlabel('Complex ID', fontsize=16)
+    plt.ylabel('Average Raptor Score', fontsize=16)
     plt.show()
 
     improvement_complex_ids = complex_ids[np.greater(average_raptor_scores_for_neighbors, average_raptor_scores_for_non_neighbors)]
     no_improvement_complex_ids = [c for c in complex_ids if c not in improvement_complex_ids]
 
-    plt.pie(x=[len(no_improvement_complex_ids), len(improvement_complex_ids)],
-            labels=['average raptor score lower in binding site', 'average raptor score higher in binding site'])
-
+    explode = (0, 0.1)
+    plt.pie(x=[len(no_improvement_complex_ids), len(improvement_complex_ids)], explode=explode, shadow=True, autopct='%1.1f%%')
+    plt.legend(['average raptor score lower in binding site', 'average raptor score higher in binding site'], loc=2)
     plt.show()
