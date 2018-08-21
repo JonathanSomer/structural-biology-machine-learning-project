@@ -1,4 +1,3 @@
-gitimport random
 import matplotlib.pyplot as plt
 from utils import fnat_utils
 from utils.fnat_utils import get_fnat_score
@@ -8,7 +7,7 @@ import scipy.stats as stats
 from objects.complex import BenchmarkComplex, ComplexType
 from objects import complex as cmp
 from objects.results_helper import ResultsHelper
-from utils import pdb_utils, raptorx_utils
+from utils import raptorx_utils
 from Constants import *
 from utils.capri_utils import FnatThresholds
 
