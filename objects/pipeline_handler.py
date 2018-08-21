@@ -7,17 +7,20 @@ from utils.fnat_utils import get_fnat_score
 
 class ResultsHelper(object):
 
-    def __init__(self, complex_ids, n_of_patchdock_results, reranker, ignore_failure=False):
+    def __init__(self, complex_ids, n_of_patchdock_results, reranker, ignore_failure=False, verbose=True):
         self.n_of_patchdock_results = n_of_patchdock_results
         self.reranker = reranker
         self.complex_helpers = {}
         for c_id in complex_ids:
+            if verbose:
+                print("ResultHelper Loading complex_id: %s" % c_id)
             if ignore_failure:
-                print("Starting complex_id: %s" % c_id)
+
                 try:
                     self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker)
                 except (OSError, IOError), e:
-                    print("%s: %s" % (c_id, str(e)))
+                    if verbose:
+                        print("%s: %s" % (c_id, str(e)))
                     pass
             else:
                 self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker)
@@ -37,19 +40,12 @@ class ResultsHelper(object):
     def get_capri_score_of_reranking(self, complex_id):
         return self.complex_helpers[complex_id].get_capri_score_of_reranking()
 
-    def get_all_fnat_scores_before_reranking(self):
-        return np.array([self.get_fnat_scores_before_reranking(complex_id)
+    def get_all_fnat_scores_reranking(self, after, top=None):
+        return np.array([self.get_fnat_scores_reranking(complex_id, after, top)
                          for complex_id in self.complex_ids])
 
-    def get_fnat_scores_before_reranking(self, complex_id):
-        return self.complex_helpers[complex_id].get_fnat_scores_before_reranking()
-
-    def get_all_fnat_scores_after_reranking(self):
-        return np.array([self.get_fnat_scores_after_reranking(complex_id)
-                         for complex_id in self.complex_ids])
-
-    def get_fnat_scores_after_reranking(self, complex_id):
-        return self.complex_helpers[complex_id].get_fnat_scores_after_reranking()
+    def get_fnat_scores_reranking(self, complex_id, after, top=None):
+        return self.complex_helpers[complex_id].get_fnat_scores_before_reranking(top)
 
     def get_all_ranked_expectation_scores(self):
         return np.array([self.get_ranked_expectation_scores(complex_id)
@@ -80,13 +76,12 @@ class ComplexHelper(object):
     def get_capri_score_of_reranking(self):
         return get_capri_score(self.reranked_complexes, self.bound_complex)
 
-    def get_fnat_scores_before_reranking(self):
-        return np.array([get_fnat_score(estimated_complex, self.bound_complex)
-                         for estimated_complex in self.original_ranked_complexes])
-
-    def get_fnat_scores_after_reranking(self):
-        return np.array([get_fnat_score(estimated_complex, self.bound_complex)
-                         for estimated_complex in self.reranked_complexes])
+    def get_fnat_scores_reranking(self, after, top=None):
+        scores = []
+        complexes = self.reranked_complexes if after else self.original_ranked_complexes
+        for i in range(top or self.n_of_patchdock_results):
+            scores.append(get_fnat_score(complexes[i], self.bound_complex))
+        return np.array(scores)
 
     def get_ranked_expectation_scores(self):
         detailed_rerank = self.reranker.rerank(self.original_ranked_complexes, detailed_return=True)
