@@ -1,6 +1,6 @@
 from Constants import *
 from Reranker.reranker import RaptorxReranker, RaptorXScoringMethod
-from objects.pipeline_handler import ResultsHelper
+from objects.results_helper import ResultsHelper
 from visualizer import evodock_plot as plot
 
 
@@ -26,5 +26,3 @@ print("fnat scores after reranking: {}".format(fnat_after_ranking))
 raptor_scores = helper.get_all_ranked_expectation_scores()
 
 print("raptorx scores: {}".format(raptor_scores))
-
-#plot.plot_raptor_to_fnat(helper)

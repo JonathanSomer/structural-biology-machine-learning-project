@@ -1,14 +1,15 @@
-import random
 import matplotlib.pyplot as plt
 from utils import fnat_utils
-
+from utils.fnat_utils import get_fnat_score
 import numpy as np
 import scipy.stats as stats
 
+from objects.complex import BenchmarkComplex, ComplexType
 from objects import complex as cmp
-from objects.pipeline_handler import ResultsHelper
-from utils import pdb_utils, raptorx_utils
+from objects.results_helper import ResultsHelper
+from utils import raptorx_utils
 from Constants import *
+from utils.capri_utils import FnatThresholds
 
 def plot_rank_to_fnat(result_helper, accumulate=False):
     # type: (ResultsHelper) -> None
@@ -96,4 +97,51 @@ def plot_average_raptor_score_in_binding_site_vs_not(trim=0.01):
     explode = (0, 0.1)
     plt.pie(x=[len(no_improvement_complex_ids), len(improvement_complex_ids)], explode=explode, shadow=True, autopct='%1.1f%%')
     plt.legend(['average raptor score lower in binding site', 'average raptor score higher in binding site'], loc=2)
+    plt.show()
+
+def plot_fnat_above_treshold_per_complex(result_helper, treshold=FnatThresholds.Acceptable):
+    fnat_before = np.array(result_helper.get_all_fnat_scores(after=False, top=TOP_RESULTS_COUNTS_FOR_CAPRI))
+    fnat_after = np.array(result_helper.get_all_fnat_scores(after=True, top=TOP_RESULTS_COUNTS_FOR_CAPRI))
+
+    above_before = np.array([len(scores[scores > treshold]) for scores in fnat_before])
+    above_after = np.array([len(scores[scores > treshold]) for scores in fnat_after])
+
+    sorted_indices = above_before.argsort()[::-1]
+    above_before = above_before[sorted_indices]
+    above_after = above_after[sorted_indices]
+
+    plt.plot(above_after, 'bo')
+    plt.plot(above_before, 'rx')
+    plt.xlabel("complexes")
+    plt.ylabel("acceptable count")
+    plt.show()
+
+def plot_max_patchdock_fnat_scores(result_helper, top=None):
+    max_fnats_bound = np.array([max(fnats) for fnats
+                                in result_helper.get_all_fnat_scores(after=False, top=top, bound=True)])
+    max_fnats_unbound = np.array([max(fnats) for fnats
+                                  in result_helper.get_all_fnat_scores(after=False, top=top, bound=False)])
+
+    sorted_indices = max_fnats_bound.argsort()[::-1]
+    max_fnats_bound = max_fnats_bound[sorted_indices]
+    max_fnats_unbound = max_fnats_unbound[sorted_indices]
+
+    plt.plot(max_fnats_bound, 'bo')
+    plt.plot(max_fnats_unbound, 'rx')
+    plt.plot([FnatThresholds.Acceptable for dot in max_fnats_bound]) #treshold line
+    plt.show()
+
+def plot_fnat_of_unbound(ids=TRAIN_COMPLEX_IDS):
+    unbounds = [BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_unbound)
+                for complex_id in ids]
+    bounds = [BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_bound)
+                for complex_id in ids]
+
+    unbound_fnats = [get_fnat_score(unbound, bound) for unbound, bound in zip(unbounds, bounds)]
+    unbound_fnats.sort(reverse=True)
+
+    plt.plot([FnatThresholds.Acceptable for dot in unbound_fnats]) #treshold line
+    plt.plot(unbound_fnats, 'bo')
+    plt.ylabel("fnat of unbound")
+    plt.xlabel("complexs")
     plt.show()
