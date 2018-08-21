@@ -25,10 +25,10 @@ class ComplexType(Enum):
 class Complex(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, complex_id):
+    def __init__(self, complex_id, re_cache=False):
         self._complex_id = complex_id
         self._neighbours = None
-        if not self._is_cached():
+        if (not self._is_cached()) or re_cache:
             self._cache_complex()
         cache = self._load_cache()
         self._receptor_sequence, self._ligand_sequence = cache['r_seq'], cache['l_seq']
@@ -119,6 +119,7 @@ class Complex(object):
             else:
                 receptor_residue, ligand_residue = residue_neighbor_B, residue_neighbor_A
 
+            # import pdb; pdb.set_trace()
             neighbor_indexes.append((receptor_residue.true_index, ligand_residue.true_index))
 
         self._neighbours = neighbor_indexes
@@ -149,9 +150,9 @@ class Complex(object):
 
 class BenchmarkComplex(Complex):
 
-    def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound):
+    def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound, re_cache=False):
         self._type = type
-        super(BenchmarkComplex, self).__init__(complex_id)
+        super(BenchmarkComplex, self).__init__(complex_id, re_cache)
 
     def _init_complex(self):
         bound = self.type == ComplexType.zdock_benchmark_bound
@@ -168,10 +169,10 @@ class BenchmarkComplex(Complex):
 
 class PatchDockComplex(Complex):
 
-    def __init__(self, complex_id, rank):
+    def __init__(self, complex_id, rank, re_cache=False):
         self.original_rank = rank
         self._type = ComplexType.patch_dock
-        super(PatchDockComplex, self).__init__(complex_id)
+        super(PatchDockComplex, self).__init__(complex_id, re_cache)
         self.init_patch_dock_score_components()
 
     def _init_complex(self):
