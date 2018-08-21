@@ -1,11 +1,10 @@
 import os.path
 
-
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
 TOP_RESULTS_COUNTS_FOR_CAPRI = 10
 
-BASE_DATA_PATH = "data"
+BASE_DATA_PATH = os.path.join(project_dir, "data")
 
 # ids for complexes with all data ready
 
@@ -16,6 +15,7 @@ TRAIN_COMPLEX_IDS = ['1ACB', '1AVX', '1CGI', '1FSK', '1I9R', '1IJK', '1IQD', '1K
 IDS_WITH_PROBLEM = ['2Z0E', '2NZ8', '1JK9', '1F6M', '1K4C', '1JIW', '1NW9', '1BJ1', '1MLC', '1WEJ']
 TEST_COMPLEX_IDS = ['4G6J', '1FQ1', '1ZM4']
 NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX = 200
+
 
 def get_zdock_benchmark_pdb_path(complex_id, ligand=True, bound=True):
     base_path = os.path.join(BASE_DATA_PATH, complex_id, "benchmark")
@@ -28,10 +28,12 @@ def get_patchdock_ranked_complex_pdb_path(complex_id, rank):
     file_name = "{}.patch_dock_output.{}.pdb".format(complex_id, rank)
     return os.path.join(base_path, file_name)
 
+
 def get_patchdock_complex_score_file_path(complex_id):
     base_path = os.path.join(BASE_DATA_PATH, complex_id, "patch_dock")
     file_name = "{}.patch_dock_output".format(complex_id)
     return os.path.join(base_path, file_name)
+
 
 def get_raptorx_dir_path(complex_id):
     return os.path.join(BASE_DATA_PATH, complex_id, "raptorx_results")
@@ -47,3 +49,6 @@ def get_zdock_benchmark_cache_path(complex_id, bound=True):
     base_path = os.path.join(BASE_DATA_PATH, complex_id, "benchmark")
     file_name = "{}_{}_cache.json".format(complex_id, 'b' if bound else 'u')
     return os.path.join(base_path, file_name)
+
+def get_file_from_ml_models_path(file_name):
+    return os.path.join(BASE_DATA_PATH, "ml_models", file_name)

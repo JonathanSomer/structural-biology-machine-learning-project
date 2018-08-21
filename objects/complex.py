@@ -25,6 +25,8 @@ class ComplexType(Enum):
 class Complex(object):
     __metaclass__ = ABCMeta
 
+    NEIGHBOUT_ATTR_TEMPLATE = '_neighbours%d'
+
     def __init__(self, complex_id, re_cache=False):
         self._complex_id = complex_id
         self._neighbours = None
@@ -32,7 +34,10 @@ class Complex(object):
             self._cache_complex()
         cache = self._load_cache()
         self._receptor_sequence, self._ligand_sequence = cache['r_seq'], cache['l_seq']
-        self._neighbours = [tuple(nb) for nb in cache['nb5']]
+        for k in cache.keys():
+            if k.startswith('nb'):
+                radius = int(k[2:])
+                setattr(self, self.NEIGHBOUT_ATTR_TEMPLATE % radius, cache[k])
 
     @property
     def complex_id(self):
@@ -59,11 +64,11 @@ class Complex(object):
         return self._ligand_sequence
 
     def get_neighbours_residues(self, neighbor_radius=NEIHGBOR_RADIUS):
-        # type: () -> lst((int, int),...)
-        '''
+        # type: () -> List[Tuple[int, int]]
+        """
         :return: list of tuples (receptor_residue_index, ligand_residue_index) in which the euclidean distance
                  between them is at most $(NEIGHBOURS_RADIUS)
-        '''
+        """
 
         def is_protein_residue(residue):
             # type: (Residue) -> bool
@@ -87,8 +92,9 @@ class Complex(object):
                 residue.true_index = true_index
                 true_index += 1
 
-        if self._neighbours:
-            return self._neighbours
+        neighbour_attr = self.NEIGHBOUT_ATTR_TEMPLATE % neighbor_radius
+        if hasattr(self, neighbour_attr) and getattr(self, neighbour_attr) is not None:
+            return getattr(self, neighbour_attr)
 
         add_true_residue_indexes(self.receptor)
         add_true_residue_indexes(self.ligand)
@@ -118,8 +124,8 @@ class Complex(object):
             # import pdb; pdb.set_trace()
             neighbor_indexes.append((receptor_residue.true_index, ligand_residue.true_index))
 
-        self._neighbours = neighbor_indexes
-        return self._neighbours
+        setattr(self, neighbour_attr, neighbor_indexes)
+        return getattr(self, neighbour_attr)
 
     @staticmethod
     def get_structure_sequence(struct):
@@ -147,10 +153,11 @@ class Complex(object):
             "complex_id": self.complex_id,
             "l_seq": Complex.get_structure_sequence(self.ligand),
             "r_seq": Complex.get_structure_sequence(self.receptor),
-            "nb5": self.get_neighbours_residues()
+            "nb5": self.get_neighbours_residues(5),
+            "nb8": self.get_neighbours_residues(8)
         }
         with open(c_path, 'w') as f:
-            json.dump(cache, f)
+            json.dump(cache, f, sort_keys=True, indent=4)
 
     def _load_cache(self):
         with open(self._get_cache_path(), 'r') as f:
