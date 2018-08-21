@@ -3,6 +3,8 @@ import os.path
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
+TOP_RESULTS_COUNTS_FOR_CAPRI = 10
+
 BASE_DATA_PATH = "data"
 
 # ids for complexes with all data ready
