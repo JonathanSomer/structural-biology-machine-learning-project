@@ -10,7 +10,7 @@ for root, dirs, files in os.walk(BASE_DATA_PATH):
         filename, file_extension = os.path.splitext(f)
         fullpath = os.path.join(root, f)
         direct_dir = os.path.basename(os.path.dirname(fullpath))
-        if direct_dir  in ('benchmark', 'patch_dock') and 'cache' in filename or file_extension == '.json':
+        if direct_dir  in ('benchmark', 'patch_dock') and 'cache' in filename and file_extension == '.json':
             new_dirpath = os.path.join(os.path.dirname(root), 'cache')
             if not os.path.exists(new_dirpath):
                 print("Creating dir {}".format(new_dirpath))
