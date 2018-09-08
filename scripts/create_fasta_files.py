@@ -1,15 +1,9 @@
 import os
 import re
 import shutil
-import warnings
 
 import pandas as pd
 from Bio.PDB import PDBParser
-from Bio.PDB.PDBExceptions import PDBConstructionWarning
-
-warnings.simplefilter('ignore', PDBConstructionWarning)
-
-from utils import pdb_utils
 
 sanity_check = True
 
@@ -21,7 +15,7 @@ if sanity_check:
     exit()
 benchmark_path = os.path.join(base_path, 'benchmark5')
 data_path = os.path.join(base_path, 'data')
-pdb_parser = PDBParser()
+pdb_parser = PDBParser(QUIET=True)
 
 
 def get_benchmark_pdb_path(complex_id, ligand=True, bound=True):
@@ -37,6 +31,17 @@ def copy_benchmark_pdb(complex_id, complex_benchmark_path, ligand=True, bound=Tr
     complex_pdb_path = os.path.join(complex_benchmark_path, os.path.basename(pdb_path))
     shutil.copy(pdb_path, complex_benchmark_path)
     return complex_pdb_path
+
+
+def get_structure_sequence(struct):
+    # type: (Structure) -> str
+    """
+    Gets the structure sequence using PPBuilder
+    :param struct: Structure object
+    :return: struct sequence
+    """
+    ppb = PPBuilder()
+    return ''.join([str(pp.get_sequence()) for pp in ppb.build_peptides(struct)])
 
 
 benchmark_metadata = pd.read_excel(os.path.join(benchmark_path, 'Table_BM5.xlsx'), header=0,
@@ -58,8 +63,8 @@ for complex in benchmark_metadata.itertuples(index=False, name='Complex'):
     ligand_u = pdb_parser.get_structure(complex_id + '_l_u', ligand_u_path)
     receptor_u = pdb_parser.get_structure(complex_id + '_r_u', receptor_u_path)
 
-    ligand_u_seq = pdb_utils.get_structure_sequence(ligand_u)
-    receptor_u_seq = pdb_utils.get_structure_sequence(receptor_u)
+    ligand_u_seq = get_structure_sequence(ligand_u)
+    receptor_u_seq = get_structure_sequence(receptor_u)
 
     with open(os.path.join(complex_benchmark_path, 'ligand.fasta'), 'w') as f:
         f.write('>ligand_%s\n' % complex_id)

@@ -1,20 +1,19 @@
-from Bio.PDB import NeighborSearch, PPBuilder, Residue
-from abc import ABCMeta, abstractmethod
-from enum import Enum
-from Constants import *
-from utils.pdb_utils import pdb_parser
 import json
-
-import warnings
-from Bio.PDB.PDBExceptions import PDBConstructionWarning
 import re
+from abc import ABCMeta, abstractmethod
 
-warnings.simplefilter('ignore', PDBConstructionWarning)
+from Bio.PDB import PDBParser, NeighborSearch, PPBuilder, Residue
+from enum import Enum
 
-NEIHGBOR_RADIUS = 8.0
+from Constants import *
+
+NEIHGBOR_RADIUS = 5
 LIGAND_STRUCT_ID = 'ligand'
 RECEPTOR_STRUCT_ID = 'receptor'
 N_PATCH_DOCK_SCORE_COMPONENTS = 4
+
+pdb_parser = PDBParser(QUIET=True)
+
 
 class ComplexType(Enum):
     zdock_benchmark_bound = 1
@@ -25,7 +24,7 @@ class ComplexType(Enum):
 class Complex(object):
     __metaclass__ = ABCMeta
 
-    NEIGHBOUT_ATTR_TEMPLATE = '_neighbours%d'
+    NEIGHBOUR_ATTR_TEMPLATE = '_neighbours%d'
 
     def __init__(self, complex_id, re_cache=False):
         self._complex_id = complex_id
@@ -37,7 +36,7 @@ class Complex(object):
         for k in cache.keys():
             if k.startswith('nb'):
                 radius = int(k[2:])
-                setattr(self, self.NEIGHBOUT_ATTR_TEMPLATE % radius, cache[k])
+                setattr(self, self.NEIGHBOUR_ATTR_TEMPLATE % radius, cache[k])
 
     @property
     def complex_id(self):
@@ -63,6 +62,7 @@ class Complex(object):
     def ligand_sequence(self):
         return self._ligand_sequence
 
+    # TODO: add cabon_alpha option for 8 radius
     def get_neighbours_residues(self, neighbor_radius=NEIHGBOR_RADIUS):
         # type: () -> List[Tuple[int, int]]
         """
@@ -92,7 +92,7 @@ class Complex(object):
                 residue.true_index = true_index
                 true_index += 1
 
-        neighbour_attr = self.NEIGHBOUT_ATTR_TEMPLATE % neighbor_radius
+        neighbour_attr = self.NEIGHBOUR_ATTR_TEMPLATE % neighbor_radius
         if hasattr(self, neighbour_attr) and getattr(self, neighbour_attr) is not None:
             return getattr(self, neighbour_attr)
 
@@ -154,8 +154,11 @@ class Complex(object):
             "l_seq": Complex.get_structure_sequence(self.ligand),
             "r_seq": Complex.get_structure_sequence(self.receptor),
             "nb5": self.get_neighbours_residues(5),
-            "nb8": self.get_neighbours_residues(8)
+            "nb8": self.get_neighbours_residues(8)  # should not be used!
         }
+        c_dir_path = os.path.dirname(c_path)
+        if not os.path.exists(c_dir_path):
+            os.makedirs(c_dir_path)
         with open(c_path, 'w') as f:
             json.dump(cache, f, sort_keys=True, indent=4)
 
@@ -200,26 +203,12 @@ class PatchDockComplex(Complex):
 
     def _init_complex(self):
         # type: () -> None
-        def _infer_r_l_chain_ids_from_benchmark_complex(self):
-            benchmark_complex = BenchmarkComplex(self._complex_id, type=ComplexType.zdock_benchmark_unbound)
-            receptor_chain_ids = [chain.get_id() for chain in list(benchmark_complex.receptor.get_chains())]
-            ligand_chain_ids = [chain.get_id() for chain in list(benchmark_complex.ligand.get_chains())]
-            return ligand_chain_ids, receptor_chain_ids
-
-        def _remove_chain_from_struct(struct, chain_id):
-            first_model = struct.get_list()[0]  # struct children are models
-            first_model.detach_child(chain_id)  # model children are chains
-
-        _ligand_chain_ids, _receptor_chain_ids = _infer_r_l_chain_ids_from_benchmark_complex(self)
-        patch_dock_complex_path = get_patchdock_ranked_complex_pdb_path(self._complex_id, self.original_rank)
-        ligand = pdb_parser.get_structure(LIGAND_STRUCT_ID, patch_dock_complex_path)
-        receptor = pdb_parser.get_structure(RECEPTOR_STRUCT_ID, patch_dock_complex_path)
-
-        for chain_id in _receptor_chain_ids:
-            _remove_chain_from_struct(ligand, chain_id)
-
-        for chain_id in _ligand_chain_ids:
-            _remove_chain_from_struct(receptor, chain_id)
+        patch_dock_ligand_path = get_patchdock_ranked_complex_pdb_path(self._complex_id, self.original_rank,
+                                                                       ligand=True)
+        patch_dock_receptor_path = get_patchdock_ranked_complex_pdb_path(self._complex_id, self.original_rank,
+                                                                         ligand=False)
+        ligand = pdb_parser.get_structure(LIGAND_STRUCT_ID, patch_dock_ligand_path)
+        receptor = pdb_parser.get_structure(RECEPTOR_STRUCT_ID, patch_dock_receptor_path)
 
         self._ligand, self._receptor = ligand, receptor
 
