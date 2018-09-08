@@ -2,13 +2,15 @@ from Constants import *
 from Reranker.reranker import RaptorxReranker, RaptorXScoringMethod, SvmRegressionReranker
 from objects.results_helper import ResultsHelper
 from visualizer import evodock_plot as plot
+from Reranker.regression_model import *
 
 
-complex_ids = ['1ACB'] #, '1CGI'
+# complex_ids = ['1CGI'] #, '1ACB'
 # complex_ids = ACCEPTED_COMPLEXES
+complex_ids = TOP_RAPTOR_CORRELATION_IDS
 n_of_patchdock_results = 200
 # reranker = RaptorxReranker(scoring_method=RaptorXScoringMethod.log_likelihood, prob_trim=0.01)
-reranker = SvmRegressionReranker(use_raptor=True)
+reranker = SvmRegressionReranker(use_raptor=True, training_data_complex_ids=TOP_RAPTOR_CORRELATION_IDS, training_data_file_name=TOP_RAPTOR_CORRELATION_PICKLE)
 
 helper = ResultsHelper(complex_ids, n_of_patchdock_results, reranker)
 

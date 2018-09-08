@@ -124,7 +124,11 @@ class RaptorxReranker(Reranker):
 # NOTE! complexes must be a subset of ACCEPTED_COMPLEXES
 class SvmRegressionReranker(Reranker):
 
-    def __init__(self, use_raptor=True):
+    # alternative args:
+    # training_data_file_name=ACCEPTED_COMPLEXES, training_data_complex_ids=TRAIN_FEATURES_AND_LABELS_PICKLE_8
+    def __init__(self, use_raptor=True, training_data_file_name=TOP_RAPTOR_CORRELATION_PICKLE, training_data_complex_ids=TOP_RAPTOR_CORRELATION_IDS):
+        self._training_data_file_name = training_data_file_name
+        self._training_data_complex_ids = training_data_complex_ids
         self._use_raptor = use_raptor
         self._classifier = NonZeroFnatClassifier()
         self._regressor = FnatRegressor()
@@ -162,14 +166,14 @@ class SvmRegressionReranker(Reranker):
 
     def _get_train_test_data(self, complex_ids, binary_labels=True, use_raptor=True):        
         if binary_labels:
-            X,y = load_features_and_binary_labels()
+            X,y = load_features_and_binary_labels(file_name=self._training_data_file_name)
         else:
-            X,y = load_features_and_continuous_labels(non_zero_data_only=False)
+            X,y = load_features_and_continuous_labels(non_zero_data_only=False, file_name=self._training_data_file_name)
 
         if not use_raptor:
             X = self._remove_raptor_components(X)
 
-        can_train_on = np.repeat(~np.isin(ACCEPTED_COMPLEXES, complex_ids), NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX)
+        can_train_on = np.repeat(~np.isin(self._training_data_complex_ids, complex_ids), NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX)
         X_train, y_train = self._unison_shuffle(X[can_train_on], y[can_train_on])
         X_test, y_test = self._unison_shuffle(X[~can_train_on], y[~can_train_on])
 

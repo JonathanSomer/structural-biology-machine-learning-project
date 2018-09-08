@@ -9,6 +9,7 @@ BASE_DATA_PATH = os.path.join(project_dir, "data")
 # ids for complexes with all data ready
 
 ACCEPTED_COMPLEXES = ['1CGI', '1KXQ', '1ACB', '1AVX', '1M10', '2W9E']
+TOP_RAPTOR_CORRELATION_IDS = ['1R6Q', '1ACB', '1CGI', '1IQD', '4DN4', '3RVW', '3V6Z', '1KXQ']
 
 TRAIN_COMPLEX_IDS = ['1ACB', '1AVX', '1CGI', '1FSK', '1I9R', '1IJK', '1IQD', '1KXQ', '1M10', '1NCA',
                      '1QFW', '1R6Q', '2FD6', '2I25', '2JEL', '2VXT', '2W9E', '3EOA', '3HMX', '3L5W',
