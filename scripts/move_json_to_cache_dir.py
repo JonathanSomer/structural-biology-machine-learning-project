@@ -18,7 +18,7 @@ for root, dirs, files in os.walk(BASE_DATA_PATH):
             new_path = os.path.join(new_dirpath, f)
             if not overwrite_existing and os.path.exists(new_path):
                 continue
-            print "move {} to {}".format(fullpath, new_path)
+            print("move {} to {}".format(fullpath, new_path))
             os.rename(fullpath, os.path.join(new_dirpath, f))
 
 
