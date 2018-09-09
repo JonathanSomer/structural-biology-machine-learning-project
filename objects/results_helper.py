@@ -7,7 +7,8 @@ from utils.fnat_utils import get_fnat_score
 
 class ResultsHelper(object):
 
-    def __init__(self, complex_ids, n_of_patchdock_results, reranker, ignore_failure=False, verbose=True):
+    def __init__(self, complex_ids, n_of_patchdock_results, reranker,
+                 ignore_failure=False, verbose=True, recache=False):
         self.n_of_patchdock_results = n_of_patchdock_results
         self.reranker = reranker
         self.complex_helpers = {}
@@ -15,15 +16,15 @@ class ResultsHelper(object):
             if verbose:
                 print("ResultHelper Loading complex_id: %s" % c_id)
             if ignore_failure:
-
                 try:
-                    self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker)
+                    self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker,
+                                                               recache)
                 except (OSError, IOError), e:
                     if verbose:
                         print("%s: %s" % (c_id, str(e)))
                     pass
             else:
-                self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker)
+                self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker, recache)
         self.complex_ids = list(self.complex_helpers.keys())
 
     def get_all_capri_scores_of_original_patchdock_ranking(self):
@@ -64,18 +65,20 @@ class ResultsHelper(object):
 
 class ComplexHelper(object):
 
-    def __init__(self, complex_id, n_of_patchdock_results, reranker):
+    def __init__(self, complex_id, n_of_patchdock_results, reranker, recache=False):
         self.complex_id = complex_id
         self.n_of_patchdock_results = n_of_patchdock_results
         self.reranker = reranker
+        self.recache = recache
         self.original_ranked_complexes = self._get_patchdock_results_by_original_rank(complex_id,
                                                                                       self.n_of_patchdock_results)
-        self.unbound_complex = BenchmarkComplex(complex_id, ComplexType.zdock_benchmark_unbound)
-        self.bound_complex = BenchmarkComplex(complex_id, ComplexType.zdock_benchmark_bound)
-        self.reranked_complexes = reranker.rerank(self.original_ranked_complexes, detailed_return=False)
+        self.unbound_complex = BenchmarkComplex(complex_id, ComplexType.zdock_benchmark_unbound, self.recache)
+        self.bound_complex = BenchmarkComplex(complex_id, ComplexType.zdock_benchmark_bound, self.recache)
+        self.detailed_reranked_complexes = reranker.rerank(self.original_ranked_complexes, detailed_return=True)
+        self.reranked_complexes = [t[0] for t in self.detailed_reranked_complexes]
 
     def _get_patchdock_results_by_original_rank(self, complex_id, n_of_patchdock_results):
-        return [PatchDockComplex(complex_id, i + 1) for i in range(n_of_patchdock_results)]
+        return [PatchDockComplex(complex_id, i + 1, self.recache) for i in range(n_of_patchdock_results)]
 
     def get_capri_score_of_original_patchdock_ranking(self):
         return get_capri_score(self.original_ranked_complexes, self.bound_complex)
@@ -91,5 +94,4 @@ class ComplexHelper(object):
         return np.array(scores)
 
     def get_ranked_expectation_scores(self):
-        detailed_rerank = self.reranker.rerank(self.original_ranked_complexes, detailed_return=True)
-        return np.array([x[2] for x in detailed_rerank])
+        return np.array([t[2] for t in self.detailed_reranked_complexes])
