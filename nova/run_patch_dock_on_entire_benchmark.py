@@ -4,7 +4,7 @@ import sys
 import argparse
 import os
 import json
-
+from paramiko import AutoAddPolicy
 
 #############################################################################
 # 
@@ -22,6 +22,7 @@ def progress(filename, size, sent):
 
 def main(username, password, test=False, force=False):
 	ssh = SSHClient()
+	ssh.set_missing_host_key_policy(AutoAddPolicy())
 	ssh.load_system_host_keys()
 	ssh.connect('nova.cs.tau.ac.il', username=username, password=password)
 
