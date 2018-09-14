@@ -7,7 +7,7 @@ from enum import Enum
 
 from Constants import *
 
-NEIHGBOR_RADIUS = 5
+NEIGHBOR_DEFAULT_RADIUS = 5
 LIGAND_STRUCT_ID = 'ligand'
 RECEPTOR_STRUCT_ID = 'receptor'
 N_PATCH_DOCK_SCORE_COMPONENTS = 4
@@ -25,18 +25,19 @@ class Complex(object):
     __metaclass__ = ABCMeta
 
     NEIGHBOUR_ATTR_TEMPLATE = '_neighbours%d'
+    NEIGHBOR_RADII = [5, 8]
 
-    def __init__(self, complex_id, re_cache=False):
+    def __init__(self, complex_id, reprocess=False):
         self._complex_id = complex_id
         self._neighbours = None
-        if (not self._is_cached()) or re_cache:
-            self._cache_complex()
-        cache = self._load_cache()
-        self._receptor_sequence, self._ligand_sequence = cache['r_seq'], cache['l_seq']
-        for k in cache.keys():
+        if (not self._is_processed()) or reprocess:
+            self._process_complex()
+        data = self._load_processed_data()
+        self._receptor_sequence, self._ligand_sequence = data['r_seq'], data['l_seq']
+        for k in data.keys():
             if k.startswith('nb'):
                 radius = int(k[2:])
-                setattr(self, self.NEIGHBOUR_ATTR_TEMPLATE % radius, cache[k])
+                setattr(self, self.NEIGHBOUR_ATTR_TEMPLATE % radius, data[k])
 
     @property
     def complex_id(self):
@@ -62,8 +63,7 @@ class Complex(object):
     def ligand_sequence(self):
         return self._ligand_sequence
 
-    # TODO: add cabon_alpha option for 8 radius
-    def get_neighbours_residues(self, neighbor_radius=NEIHGBOR_RADIUS):
+    def get_neighbours_residues(self, neighbor_radius=NEIGHBOR_DEFAULT_RADIUS):
         # type: () -> List[Tuple[int, int]]
         """
         :return: list of tuples (receptor_residue_index, ligand_residue_index) in which the euclidean distance
@@ -92,14 +92,24 @@ class Complex(object):
                 residue.true_index = true_index
                 true_index += 1
 
+        if neighbor_radius not in self.NEIGHBOR_RADII:
+            raise ValueError("radius value is invalid")
+
         neighbour_attr = self.NEIGHBOUR_ATTR_TEMPLATE % neighbor_radius
         if hasattr(self, neighbour_attr) and getattr(self, neighbour_attr) is not None:
             return getattr(self, neighbour_attr)
 
         add_true_residue_indexes(self.receptor)
         add_true_residue_indexes(self.ligand)
-        ligand_atoms = list(self.ligand.get_atoms())
-        receptor_atoms = list(self.receptor.get_atoms())
+        # TODO: change this hardcoded shit
+        if neighbor_radius == 8:
+            ligand_atoms = [res['CA'] for res in self.ligand.get_residues() if res.has_id('CA')]
+        else:
+            ligand_atoms = list(self.ligand.get_atoms())
+        if neighbor_radius == 8:
+            receptor_atoms = [res['CA'] for res in self.receptor.get_residues() if res.has_id('CA')]
+        else:
+            receptor_atoms = list(self.receptor.get_atoms())
 
         nb = NeighborSearch(ligand_atoms + receptor_atoms)
         all_neighbours = nb.search_all(neighbor_radius, level='R')
@@ -147,38 +157,38 @@ class Complex(object):
             init_fn()
         return getattr(self, attr_str)
 
-    def _cache_complex(self):
-        c_path = self._get_cache_path()
-        cache = {
+    def _process_complex(self):
+        data_path = self._get_processed_path()
+        data = {
             "complex_id": self.complex_id,
             "l_seq": Complex.get_structure_sequence(self.ligand),
             "r_seq": Complex.get_structure_sequence(self.receptor),
             "nb5": self.get_neighbours_residues(5),
             "nb8": self.get_neighbours_residues(8)  # should not be used!
         }
-        c_dir_path = os.path.dirname(c_path)
-        if not os.path.exists(c_dir_path):
-            os.makedirs(c_dir_path)
-        with open(c_path, 'w') as f:
-            json.dump(cache, f, sort_keys=True, indent=4)
+        data_dir_path = os.path.dirname(data_path)
+        if not os.path.exists(data_dir_path):
+            os.makedirs(data_dir_path)
+        with open(data_path, 'w') as f:
+            json.dump(data, f, sort_keys=True, indent=4)
 
-    def _load_cache(self):
-        with open(self._get_cache_path(), 'r') as f:
+    def _load_processed_data(self):
+        with open(self._get_processed_path(), 'r') as f:
             return json.load(f)
 
-    def _is_cached(self):
-        return os.path.isfile(self._get_cache_path())
+    def _is_processed(self):
+        return os.path.isfile(self._get_processed_path())
 
     @abstractmethod
-    def _get_cache_path(self):
+    def _get_processed_path(self):
         raise NotImplementedError("abs method")
 
 
 class BenchmarkComplex(Complex):
 
-    def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound, re_cache=False):
+    def __init__(self, complex_id, type=ComplexType.zdock_benchmark_bound, reprocess=False):
         self._type = type
-        super(BenchmarkComplex, self).__init__(complex_id, re_cache)
+        super(BenchmarkComplex, self).__init__(complex_id, reprocess)
 
     def _init_complex(self):
         bound = self.type == ComplexType.zdock_benchmark_bound
@@ -188,17 +198,17 @@ class BenchmarkComplex(Complex):
         receptor = pdb_parser.get_structure(RECEPTOR_STRUCT_ID, receptor_pdb_file_path)
         self._ligand, self._receptor = ligand, receptor
 
-    def _get_cache_path(self):
+    def _get_processed_path(self):
         bound = self.type == ComplexType.zdock_benchmark_bound
-        return get_zdock_benchmark_cache_path(self.complex_id, bound)
+        return get_zdock_benchmark_processed_data_path(self.complex_id, bound)
 
 
 class PatchDockComplex(Complex):
 
-    def __init__(self, complex_id, rank, re_cache=False):
+    def __init__(self, complex_id, rank, reprocess=False):
         self.original_rank = rank
         self._type = ComplexType.patch_dock
-        super(PatchDockComplex, self).__init__(complex_id, re_cache)
+        super(PatchDockComplex, self).__init__(complex_id, reprocess)
         self.init_patch_dock_score_components()
 
     def _init_complex(self):
@@ -212,8 +222,8 @@ class PatchDockComplex(Complex):
 
         self._ligand, self._receptor = ligand, receptor
 
-    def _get_cache_path(self):
-        return get_patchdock_ranked_complex_cache_path(self.complex_id, self.original_rank)
+    def _get_processed_path(self):
+        return get_patchdock_ranked_complex_processed_data_path(self.complex_id, self.original_rank)
 
     def init_patch_dock_score_components(self):
         with open(get_patchdock_complex_score_file_path(self.complex_id), "r") as f:

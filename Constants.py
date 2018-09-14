@@ -48,15 +48,15 @@ def get_raptorx_dir_path(complex_id):
     return os.path.join(BASE_DATA_PATH, complex_id, "raptorx_results")
 
 
-def get_patchdock_ranked_complex_cache_path(complex_id, rank):
-    base_path = os.path.join(BASE_DATA_PATH, complex_id, "cache")
-    file_name = "{}.cache.{}.json".format(complex_id, rank)
+def get_patchdock_ranked_complex_processed_data_path(complex_id, rank):
+    base_path = os.path.join(BASE_DATA_PATH, complex_id, "processed_data")
+    file_name = "{}.processed.{}.json".format(complex_id, rank)
     return os.path.join(base_path, file_name)
 
 
-def get_zdock_benchmark_cache_path(complex_id, bound=True):
-    base_path = os.path.join(BASE_DATA_PATH, complex_id, "cache")
-    file_name = "{}_{}_cache.json".format(complex_id, 'b' if bound else 'u')
+def get_zdock_benchmark_processed_data_path(complex_id, bound=True):
+    base_path = os.path.join(BASE_DATA_PATH, complex_id, "processed_data")
+    file_name = "{}_{}_processed.json".format(complex_id, 'b' if bound else 'u')
     return os.path.join(base_path, file_name)
 
 

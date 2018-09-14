@@ -26,10 +26,10 @@ def get_features_and_labels(pickle_data=True, use_8_angstrom=True, re_cache=True
 
 	for complex_id in complex_ids:
 
-		benchmark_complex = BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_bound, re_cache=re_cache)
+		benchmark_complex = BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_bound, reprocess=re_cache)
 
 		for rank in range(1, NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX + 1):
-			patch_dock_complex = PatchDockComplex(complex_id, rank, re_cache=re_cache)
+			patch_dock_complex = PatchDockComplex(complex_id, rank, reprocess=re_cache)
 
 			features = get_patch_dock_complex_features(patch_dock_complex)
 			target = get_fnat_score(patch_dock_complex, benchmark_complex)

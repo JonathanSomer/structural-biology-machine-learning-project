@@ -1,3 +1,6 @@
+# compatibility for python 2 and 3
+from builtins import str
+
 import os
 import traceback
 
@@ -16,7 +19,7 @@ def parse_pdb_line(pdb_line):
     if line_chain is None:
         maybe_chain = pdb_line_tup[4][0]
         maybe_res = pdb_line_tup[4][1:]
-        if maybe_chain.isalpha() and unicode(maybe_res).isdecimal() and int(maybe_res) >= 1000:
+        if maybe_chain.isalpha() and str(maybe_res).isdecimal() and int(maybe_res) >= 1000:
             line_res = int(maybe_res)
         else:
             line_res = int(pdb_line_tup[4])
