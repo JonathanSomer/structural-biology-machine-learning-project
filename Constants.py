@@ -6,6 +6,11 @@ TOP_RESULTS_COUNTS_FOR_CAPRI = 10
 
 BASE_DATA_PATH = os.path.join(project_dir, "data")
 
+LIGAND_SEPARATOR_HEADER = "LIGAND SEPARATOR\n"
+LIGAND_HEADER = "LIGAND\n"
+RECEPTOR_HEADER = "RECEPTOR\n"
+
+
 # ids for complexes with all data ready
 
 ACCEPTED_COMPLEXES = ['1CGI', '1KXQ', '1ACB', '1AVX', '1M10', '2W9E']
@@ -31,9 +36,13 @@ def get_zdock_benchmark_pdb_path(complex_id, ligand=True, bound=True):
     file_name = "{}_{}_{}.pdb".format(complex_id, 'l' if ligand else 'r', 'b' if bound else 'u')
     return os.path.join(base_path, file_name)
 
+def get_patchdock_raw_result_pdb_path(complex_id, rank):
+    base_path = os.path.join(BASE_DATA_PATH, complex_id, "patch_dock")
+    file_name = "{}.patch_dock_output.{}.pdb".format(complex_id, rank)
+    return os.path.join(base_path, file_name)
 
 def get_patchdock_ranked_complex_pdb_path(complex_id, rank, ligand):
-    base_path = os.path.join(BASE_DATA_PATH, complex_id, "patch_dock", "processed")
+    base_path = os.path.join(BASE_DATA_PATH, complex_id, "patch_dock")
     file_name = "{}.patch_dock_output.{}.{}.pdb".format(complex_id, rank, 'l' if ligand else 'r')
     return os.path.join(base_path, file_name)
 
@@ -42,7 +51,6 @@ def get_patchdock_complex_score_file_path(complex_id):
     base_path = os.path.join(BASE_DATA_PATH, complex_id, "patch_dock")
     file_name = "{}.patch_dock_output".format(complex_id)
     return os.path.join(base_path, file_name)
-
 
 def get_raptorx_dir_path(complex_id):
     return os.path.join(BASE_DATA_PATH, complex_id, "raptorx_results")
