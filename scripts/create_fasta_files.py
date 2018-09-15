@@ -3,13 +3,13 @@ import re
 import shutil
 
 import pandas as pd
-from Bio.PDB import PDBParser
+from Bio.PDB import PDBParser, PPBuilder
 
 sanity_check = True
 
 base_path = os.path.abspath(os.pardir)
 if sanity_check:
-    print base_path
+    print(base_path)
     raise EnvironmentError('Please make sure this is the path to the root directory of the project. '
                            'If not, you can hard code it to the base_path parameter.')
     exit()
