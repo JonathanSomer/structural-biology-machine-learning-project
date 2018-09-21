@@ -1,16 +1,17 @@
 from Bio import pairwise2
 from objects.complex import *
 
+seq_maps_cache = {}
 
-def get_fnat_score(estimated_complex, benchmark_complex):
-    numerator = len(_intersect_neighbours_between_complexes(estimated_complex, benchmark_complex))
-    denomenator = float(len(benchmark_complex.get_neighbours_residues()))
+def get_fnat_score(estimated_complex, benchmark_complex, n_radius=5):
+    numerator = len(_intersect_neighbours_between_complexes(estimated_complex, benchmark_complex, n_radius))
+    denomenator = float(len(benchmark_complex.get_neighbours_residues(n_radius)))
     return float(numerator / denomenator)
 
 
-def _intersect_neighbours_between_complexes(c1, c2):
-    residues_c1 = [tuple(pos) for pos in c1.get_neighbours_residues()]
-    residues_c2 = [tuple(pos) for pos in c2.get_neighbours_residues()]
+def _intersect_neighbours_between_complexes(c1, c2,  n_radius=5):
+    residues_c1 = [tuple(pos) for pos in c1.get_neighbours_residues(n_radius)]
+    residues_c2 = [tuple(pos) for pos in c2.get_neighbours_residues(n_radius)]
     neighbours_c1, neighbours_c2 = set(residues_c1), set(residues_c2)
 
     receptor_pos_map = get_position_map_between_sequences(c1.receptor_sequence, c2.receptor_sequence)
@@ -31,9 +32,11 @@ def get_position_map_between_sequences(seq1, seq2):
     """
     :return: a map from residue indices of seq1 to indices in seq2 corresponding to their pairwise alignment
     """
-    alignments = pairwise2.align.globalxx(seq1, seq2)
-    from Bio.pairwise2 import format_alignment
-    return _get_position_map_from_alignment(*alignments[0])
+    if (seq1, seq2) not in seq_maps_cache:
+        alignments = pairwise2.align.globalxx(seq1, seq2)
+        from Bio.pairwise2 import format_alignment
+        seq_maps_cache[(seq1, seq2)] = _get_position_map_from_alignment(*alignments[0])
+    return seq_maps_cache[(seq1, seq2)]
 
 
 def _get_position_map_from_alignment(align1, align2, score, begin, end):

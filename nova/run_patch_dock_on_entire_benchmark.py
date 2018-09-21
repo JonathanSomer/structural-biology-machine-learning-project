@@ -41,7 +41,7 @@ def main(username, password, test=False, force=False):
 		copied_successfully = []
 
 	for complex_code in all_complex_codes:
-		if len(complex_code) != 4 or complex_code in copied_successfully:
+		if len(complex_code) != 4:
 			continue
 
 		print("Copying complex: %s" % complex_code)
@@ -49,8 +49,10 @@ def main(username, password, test=False, force=False):
 		try:
 			ssh.exec_command('mkdir ~/data/' + complex_code + '/')
 			ssh.exec_command('mkdir ~/data/' + complex_code + '/benchmark/')
+			ssh.exec_command('mkdir ~/data/' + complex_code + '/patch_dock/')
 			scp.put('../data/' + complex_code + '/benchmark/' + complex_code + '_l_u.pdb', '~/data/' + complex_code + '/benchmark/')
 			scp.put('../data/' + complex_code + '/benchmark/' + complex_code + '_r_u.pdb', '~/data/' + complex_code + '/benchmark/')
+			scp.put("../data/{0}/patch_dock/{0}.patch_dock_output".format(complex_code), '~/data/' + complex_code + '/patch_dock/')
 			copied_successfully.append(complex_code)
 
 			with open('./copied_successfully.json', 'w') as f:
@@ -78,7 +80,8 @@ def main(username, password, test=False, force=False):
 				patch_dock_ran_successfully.append(complex_code)
 				with open('./patch_dock_ran_successfully.json', 'w') as f:
 					json.dump(patch_dock_ran_successfully, f)
-		except:
+		except Exception as e:
+			print(e.message)
 			print("ERROR with: %s" % complex_code)
 
 	print("DONE")
@@ -93,4 +96,3 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--force', help='re uploads and runs everything', default=False, action='store_true')
     args = parser.parse_args()
 
-main(args.username, args.password, test=args.test, force=args.force)

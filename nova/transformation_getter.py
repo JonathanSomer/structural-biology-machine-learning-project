@@ -1,10 +1,11 @@
-
+import time
 from paramiko import SSHClient
 from scp import SCPClient
 import sys
 import argparse
 import os
-import json
+from paramiko import AutoAddPolicy
+
 
 
 #############################################################################
@@ -22,44 +23,39 @@ def progress(filename, size, sent):
 
 def main(complex_code, num_transformations, username, password, test=False, force=False, keep_transformations=False):
 	ssh = SSHClient()
+	ssh.set_missing_host_key_policy(AutoAddPolicy())
 	ssh.load_system_host_keys()
 	ssh.connect('nova.cs.tau.ac.il', username=username, password=password)
 	scp = SCPClient(ssh.get_transport(), progress = progress)
 
 	c = complex_code
-	print(c, num_transformations)
-
 	if not os.path.exists('../data/{}/patch_dock/'.format(c)):
 		os.makedirs('../data/{}/patch_dock/'.format(c))
 
+	ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('cd ~/PatchDock; rm ../data/{}/patch_dock/{}.patch_dock_output.*'.format(c,c))
+	print(ssh_stdout.read(), ssh_stderr.read())
+
+	ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
+		'cd ~/PatchDock; ./transOutput.pl ../data/{}/patch_dock/{}.patch_dock_output {} {}'.format(c, c, str(1),
+
+																							   str(num_transformations)))
+
+	print(ssh_stdout.read(), ssh_stderr.read())
+	print("sleeps 20 sec ...")
+	time.sleep(20)
+	print("start fetching results from nova...")
 	for i in range(1, num_transformations+1):
-		print(i)
+		if (i-1)%100 == 0: print(i)
 		try:
-			ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('cd ~/PatchDock; rm ../data/{}/patch_dock/{}.patch_dock_output.*'.format(c,c))
-			# print(ssh_stdout.read(), ssh_stderr.read())
-			ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('cd ~/PatchDock; ./transOutput.pl ../data/{}/patch_dock/{}.patch_dock_output {} {}'.format(c,c, str(i), str(i+1)))
-			# print(ssh_stdout.read(), ssh_stderr.read())
 			scp.get('~/data/{}/patch_dock/{}.patch_dock_output.{}.pdb'.format(c,c, str(i)), '../data/{}/patch_dock/'.format(c))
-		except:
+		except Exception as e:
+
+			print(e.message)
 			print("ERROR with: %s" % complex_code)
 
-		ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('cd ~/PatchDock; rm ../data/{}/patch_dock/{}.patch_dock_output.*'.format(c,c))
-		print(ssh_stdout.read(), ssh_stderr.read())
-
 	scp.close()
-
-	################################################################
-	#             RUN STUFF ON TRANSFORMATIONS FROM HERE:
-	################################################################
-
-
-
-
-
-	################################################################
-	#              		  AND UP TO HERE
-	################################################################	
-
+	ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('cd ~/PatchDock; rm ../data/{}/patch_dock/{}.patch_dock_output.*'.format(c,c))
+	print(ssh_stdout.read(), ssh_stderr.read())
 
 	if not keep_transformations:
 		for i in range(1, num_transformations+1):
@@ -68,7 +64,6 @@ def main(complex_code, num_transformations, username, password, test=False, forc
 			except:
 				print("error with transformation number %d" % i)
 			
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -81,10 +76,4 @@ if __name__ == "__main__":
     parser.add_argument('-k', '--keep_transformations', help='do not delete transformations when done', default=False, action='store_true')
     args = parser.parse_args()
 
-main(complex_code = args.complex, 
-	 num_transformations = int(args.num_transformations), 
-	 username = args.username, 
-	 password = args.password, 
-	 test=args.test, 
-	 force=args.force,
-	 keep_transformations=args.keep_transformations)
+
