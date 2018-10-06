@@ -4,7 +4,6 @@ from enum import Enum
 import numpy as np
 from Constants import *
 from abc import ABCMeta, abstractmethod
-# from Reranker.regression_model import *
 from objects.processed_result import ComplexProcessedResult
 
 
@@ -123,7 +122,6 @@ class RaptorxReranker(Reranker):
             return np.prod(neighbour_scores)
         elif method == RaptorXScoringMethod.percentage:
             cutoff_value = np.percentile(raptorx_mat.flatten(), arg)
-            print(cutoff_value)
             return len(neighbour_scores[neighbour_scores >= cutoff_value])
         elif method == RaptorXScoringMethod.sqrt_sum:
             return np.sum(np.sqrt(neighbour_scores))
@@ -132,73 +130,3 @@ class RaptorxReranker(Reranker):
         elif method == RaptorXScoringMethod.norm:
             return np.linalg.norm(neighbour_scores)
 
-'''
-# NOTE! complexes must be a subset of ACCEPTED_COMPLEXES
-class SvmRegressionReranker(Reranker):
-
-    # alternative args:
-    # training_data_file_name=ACCEPTED_COMPLEXES, training_data_complex_ids=TRAIN_FEATURES_AND_LABELS_PICKLE_8
-    def __init__(self, use_raptor=True, training_data_file_name=TOP_RAPTOR_CORRELATION_PICKLE,
-                 training_data_complex_ids=TOP_RAPTOR_CORRELATION_IDS):
-        self._training_data_file_name = training_data_file_name
-        self._training_data_complex_ids = training_data_complex_ids
-        self._use_raptor = use_raptor
-        self._classifier = NonZeroFnatClassifier()
-        self._regressor = FnatRegressor()
-
-    def rerank(self, complexes, detailed_return=False):
-        complex_ids = np.unique([c.complex_id for c in complexes])
-        assert len(complex_ids) == 1
-
-        self._train_classifier(complex_ids, use_raptor=self._use_raptor)
-        self._train_regressor(complex_ids, use_raptor=self._use_raptor)
-
-        features = [[get_patch_dock_complex_features(c, include_raptor_score=self._use_raptor)] for c in complexes]
-        print("feature len", len(features[0][0]))
-        scores = [predict_fnat_from_features(f, self._classifier, self._regressor) for f in features]
-
-        if detailed_return:
-            return [(complexes[i], i, scores[i]) for i in np.argsort(scores)][::-1]
-        return [complexes[i] for i in np.argsort(scores)][::-1]
-
-    # PRIVATE METHODS:
-    def _unison_shuffle(self, X, y):
-        assert len(X) == len(y)
-        p = np.random.permutation(len(X))
-        return X[p], y[p]
-
-    def _train_classifier(self, complex_ids, use_raptor=True):
-        X_train, y_train, X_test, y_test = self._get_train_test_data(complex_ids, binary_labels=True,
-                                                                     use_raptor=use_raptor)
-        self._classifier.fit(X_train, y_train)
-
-    def _train_regressor(self, complex_ids, use_raptor=True):
-        X_train, y_train, X_test, y_test = self._get_train_test_data(complex_ids, binary_labels=False,
-                                                                     use_raptor=use_raptor)
-        self._regressor.fit(X_train, y_train)
-        # print("regressor params:", self._regressor._regressor.coef_)
-
-    def _get_train_test_data(self, complex_ids, binary_labels=True, use_raptor=True):
-        if binary_labels:
-            X, y = load_features_and_binary_labels(file_name=self._training_data_file_name)
-        else:
-            X, y = load_features_and_continuous_labels(non_zero_data_only=False,
-                                                       file_name=self._training_data_file_name)
-
-        if not use_raptor:
-            X = self._remove_raptor_components(X)
-
-        can_train_on = np.repeat(~np.isin(self._training_data_complex_ids, complex_ids),
-                                 NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX)
-        X_train, y_train = self._unison_shuffle(X[can_train_on], y[can_train_on])
-        X_test, y_test = self._unison_shuffle(X[~can_train_on], y[~can_train_on])
-
-        if not binary_labels:
-            has_positive_target = np.greater(y_train, 0)
-            X_train, y_train = X_train[has_positive_target], y_train[has_positive_target]
-
-        return X_train, y_train, X_test, y_test
-
-    def _remove_raptor_components(self, X):
-        return X[:, :N_PATCH_DOCK_SCORE_COMPONENTS]
-'''

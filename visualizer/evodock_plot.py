@@ -27,8 +27,8 @@ def plot_rank_to_fnat(result_helper, accumulate=False):
 
     top = 10
     x = np.arange(10) + 1
-    original_fnat_scores = process_scores(result_helper.get_all_fnat_scores(False, top))
-    reranked_fnat_scores = process_scores(result_helper.get_all_fnat_scores(True, top))
+    original_fnat_scores = process_scores(result_helper.get_all_fnat_scores(after=False, top=top))
+    reranked_fnat_scores = process_scores(result_helper.get_all_fnat_scores(after=True, top=top))
 
     plt.ylim(ymin=0.0, ymax=max(np.max(original_fnat_scores), np.max(reranked_fnat_scores)) + 0.05)
     plt.scatter(x, original_fnat_scores, c='b', label='Original Ranking')
@@ -64,8 +64,8 @@ def plot_raptor_to_fnat(result_helper):
     plt.ylabel('fnat')
     plt.show()
 
-
 def plot_average_raptor_score_in_binding_site_vs_not(trim=0.01):
+    #todo: need to make this method use only surface resdius
     bound_complexes = [cmp.BenchmarkComplex(complex_id=complex_id, type=cmp.ComplexType.zdock_benchmark_bound) for
                        complex_id in TRAIN_COMPLEX_IDS]
 
@@ -132,19 +132,15 @@ def plot_fnat_above_threshold_per_complex(result_helper, threshold=FnatThreshold
 
 
 def plot_max_patchdock_fnat_scores(result_helper, top=None):
-    max_fnats_bound = np.array([max(fnats) for fnats
-                                in result_helper.get_all_fnat_scores(after=False, top=top, bound=True)])
-    max_fnats_unbound = np.array([max(fnats) for fnats
-                                  in result_helper.get_all_fnat_scores(after=False, top=top, bound=False)])
+    max_fnat = np.array([max(fnats) for fnats
+                                in result_helper.get_all_fnat_scores(after=False, top=top)])
 
-    sorted_indices = max_fnats_bound.argsort()[::-1]
-    max_fnats_bound = max_fnats_bound[sorted_indices]
-    max_fnats_unbound = max_fnats_unbound[sorted_indices]
+    sorted_indices = max_fnat.argsort()[::-1]
+    max_fnat = max_fnat[sorted_indices]
     ids = np.array(result_helper.complex_ids)[sorted_indices]
 
-    plt.plot(max_fnats_bound, 'bo', label="bound")
-    plt.plot(max_fnats_unbound, 'rx', label="unbound")
-    plt.plot([FnatThresholds.Acceptable for dot in max_fnats_bound]) #treshold line
+    plt.plot(max_fnat, 'bo', label="bound")
+    plt.plot([FnatThresholds.Acceptable for dot in max_fnat]) #treshold line
     plt.xticks(np.arange(len(ids)), ids, rotation=45)
     plt.xlabel("complex id")
     plt.ylabel("max fnat score for all patchdock results")
@@ -181,7 +177,7 @@ def raptor_to_fnat_plot_per_complex(result_helper):
 
         plt.subplot(2, n_plots/2 + n_plots%2, i+1)
 
-        plt.plot([FnatThresholds.Acceptable for dot in range(max(np.array(raptor_scores_top10).astype(int)))]) #treshold line
+        #plt.plot([FnatThresholds.Acceptable for dot in range(max(np.array(raptor_scores_top10).astype(int)))]) #treshold line
         plt.scatter(raptor_scores, fnat_scores, c='b')
         plt.scatter(raptor_scores_top10, fnat_scores_top_10, c='r')
         plt.plot(raptor_scores, line, 'r',
