@@ -17,18 +17,13 @@ class FnatThresholds(Enum):
 
 # this will indicate how many of the first 10 results is of each acceptance criteria
 # thousands for high, hundreds for medium, tens for acceptance, and ones for incorrect
-def get_capri_score(ranked_complexes, banchmark_complex):
+def get_capri_score(ranked_complexes, benchmark_complex):
     top_10 = ranked_complexes[:10]
-    return sum(_get_capri_score_for_estimated_complex(estimated_complex, banchmark_complex)
+    return sum(_get_capri_score_for_estimated_complex(estimated_complex, benchmark_complex)
                for estimated_complex in top_10)
 
 
-def _get_capri_score_for_estimated_complex(estimated_complex, benchmark_complex):
-    fnat = get_fnat_score(estimated_complex, benchmark_complex)
-    return _get_capri_score_from_fnat(fnat)
-
-
-def _get_capri_score_from_fnat(fnat):
+def convert_fnat_to_capri(fnat):
     if fnat > FnatThresholds.High.value:
         return CapriAcceptanceLevelScores.High.value
     elif fnat > FnatThresholds.Medium.value:
@@ -37,3 +32,8 @@ def _get_capri_score_from_fnat(fnat):
         return CapriAcceptanceLevelScores.Acceptable.value
     else:
         return CapriAcceptanceLevelScores.Incorrect.value
+
+
+def _get_capri_score_for_estimated_complex(estimated_complex, benchmark_complex):
+    fnat = get_fnat_score(estimated_complex, benchmark_complex)
+    return convert_fnat_to_capri(fnat)

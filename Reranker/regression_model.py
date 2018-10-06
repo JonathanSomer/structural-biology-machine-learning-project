@@ -36,7 +36,7 @@ def get_features_and_labels(pickle_data=True, use_8_angstrom=True, re_cache=True
 
 			X.append(features)
 			y.append(target)
-			print(complex_id, t	arget)
+			print(complex_id, target)
 
 	if pickle_data:
 		data = { 'X' : X, 'y' : y }

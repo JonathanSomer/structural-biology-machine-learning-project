@@ -1,8 +1,8 @@
 import numpy as np
 
+import utils.capri_utils as capri_utils
 from objects.complex import *
-from utils.capri_utils import get_capri_score
-from utils.fnat_utils import get_fnat_score
+from objects.processed_result import ComplexProcessedResult
 
 
 class ResultsHelper(object):
@@ -15,16 +15,14 @@ class ResultsHelper(object):
         for c_id in complex_ids:
             if verbose:
                 print("ResultHelper Loading complex_id: %s" % c_id)
-            if ignore_failure:
-                try:
-                    self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker,
-                                                               recache)
-                except (OSError, IOError), e:
-                    if verbose:
-                        print("%s: %s" % (c_id, str(e)))
-                    pass
-            else:
-                self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker, recache)
+            try:
+                self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker,
+                                                           recache)
+            except Exception as e:
+                if verbose:
+                    print("%s: %s" % (c_id, str(e)))
+                if not ignore_failure:
+                    raise
         self.complex_ids = list(self.complex_helpers.keys())
 
     def get_all_capri_scores_of_original_patchdock_ranking(self):
@@ -70,28 +68,39 @@ class ComplexHelper(object):
         self.n_of_patchdock_results = n_of_patchdock_results
         self.reranker = reranker
         self.recache = recache
-        self.original_ranked_complexes = self._get_patchdock_results_by_original_rank(complex_id,
-                                                                                      self.n_of_patchdock_results)
-        self.unbound_complex = BenchmarkComplex(complex_id, ComplexType.zdock_benchmark_unbound, self.recache)
-        self.bound_complex = BenchmarkComplex(complex_id, ComplexType.zdock_benchmark_bound, self.recache)
+        self.receptor_sequence = self.get_sequence_from_fasta(ligand=False)
+        self.ligand_sequence = self.get_sequence_from_fasta(ligand=True)
+        self.original_ranked_complexes = self._get_patchdock_results()
         self.detailed_reranked_complexes = reranker.rerank(self.original_ranked_complexes, detailed_return=True)
         self.reranked_complexes = [t[0] for t in self.detailed_reranked_complexes]
 
-    def _get_patchdock_results_by_original_rank(self, complex_id, n_of_patchdock_results):
-        return [PatchDockComplex(complex_id, i + 1, self.recache) for i in range(n_of_patchdock_results)]
+    def _get_patchdock_results(self):
+        # type: (str, int) -> List[ComplexProcessedResult]
+        with open(get_processed_data_json_path(self.complex_id)) as f:
+            results_json = json.load(f)
+        return [ComplexProcessedResult(self.complex_id, self.receptor_sequence, self.ligand_sequence, results_json[i])
+                for i in range(self.n_of_patchdock_results)]
+
+    def get_sequence_from_fasta(self, ligand):
+        with open(get_complex_fasta_path(self.complex_id, ligand)) as f:
+            next(f)
+            return f.readline()
 
     def get_capri_score_of_original_patchdock_ranking(self):
-        return get_capri_score(self.original_ranked_complexes, self.bound_complex)
+        return self.get_capri_score(False)
 
     def get_capri_score_of_reranking(self):
-        return get_capri_score(self.reranked_complexes, self.bound_complex)
+        return self.get_capri_score(True)
+
+    def get_capri_score(self, after):
+        complexes = self.reranked_complexes if after else self.original_ranked_complexes
+        top_10 = complexes[:10]
+        x= sum([capri_utils.convert_fnat_to_capri(comp.get_fnat_score()) for comp in top_10])
+        return x
 
     def get_fnat_scores(self, after, top=None, bound=True):
-        scores = []
         complexes = self.reranked_complexes if after else self.original_ranked_complexes
-        for i in range(top or self.n_of_patchdock_results):
-            scores.append(get_fnat_score(complexes[i], self.bound_complex if bound else self.unbound_complex))
-        return np.array(scores)
+        return np.array([complexes[i].get_fnat_score() for i in range(top or self.n_of_patchdock_results)])
 
     def get_ranked_expectation_scores(self):
         return np.array([t[2] for t in self.detailed_reranked_complexes])

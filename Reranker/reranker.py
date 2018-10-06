@@ -2,12 +2,11 @@ import os
 
 from enum import Enum
 import numpy as np
-from objects import complex
-from utils import pdb_utils
-from Constants import get_raptorx_dir_path
+from Constants import *
 from abc import ABCMeta, abstractmethod
-from Reranker.regression_model import *
-from objects.complex import *
+# from Reranker.regression_model import *
+from objects.processed_result import ComplexProcessedResult
+
 
 class RaptorXScoringMethod(Enum):
     """
@@ -15,10 +14,10 @@ class RaptorXScoringMethod(Enum):
     """
     log_likelihood = "sum of log likelihood"  # sum of log probablities
     likelihood = "sum of likelihood"  # multiply probabilities
-    percentage = "cutoff by percentile" # cutoff percentage
+    percentage = "cutoff by percentile"  # cutoff percentage
     sqrt_sum = "sum of sqrt"
     cbrt_sum = "sum of cube"
-    norm = "norm" # euclidean distance
+    norm = "norm"  # euclidean distance
 
 
 class Reranker(object):
@@ -40,21 +39,48 @@ class RaptorxReranker(Reranker):
         self.prob_trim = prob_trim
         self._method_arg = method_arg
 
+    def rerank(self, complexes, raptorx_matrix=None, detailed_return=False):
+        # type: (self, List[complex.Complex]) -> Union[List[complex.Complex], List[complex.Complex, int, float]]
+        """
+        Reranks a list of Complexes by raptorx matrix and given scoring parameters.
+        :param complexes: list of complexes to rerank
+        :param detailed_return: returns a more detailed list with the score of each complex
+        :return: reordered list by the score calculated using the conf params given in init
+        """
+        if not isinstance(complexes, list):
+            raise TypeError("complexes argument must by of list type")
+        if len(complexes) < 1:
+            raise ValueError("List of complexes must contain at least one complex")
+        comp = complexes[0]
+        if raptorx_matrix is None:
+            raptorx_matrix = RaptorxReranker.get_raptorx_matrix(comp)
+        # Give each complex it's score
+        ranks = []
+        for i, res_complex in enumerate(complexes):
+            neighbours = res_complex.get_neighbours_residues()
+            score = float(RaptorxReranker.get_raptorx_score(raptorx_matrix, neighbours, self.scoring_method,
+                                                            self.prob_trim, self._method_arg))
+            ranks.append((i, score))
+        ranks = sorted(ranks, key=lambda rank: rank[1], reverse=True)
+        if detailed_return:
+            return [(complexes[i], i, score) for i, score in ranks]
+        return [complexes[i] for i, score in ranks]
+
     @staticmethod
-    def get_raptorx_matrix(complex_id, filepath=None, desired_shape=None):
-        # type: (str, str, Tuple[int, int]) -> np.ndarray
+    def get_raptorx_matrix(res_complex, filepath=None):
+        # type: (ComplexProcessedResult, str, bool) -> np.ndarray
         """
         Returns an numpy 2D ndarray of the score raptorx matrix with the given arguments.
         The first dimension is the receptor sequence and the second the ligand
         Can be given a complex id to look for or a file path of the matrix.
-        :param complex_id: complex id of the raptorx matrix, uses the convensional paths specified in Constants
+        :param res_complex: complex of the raptorx matrix, uses the conventional paths specified in Constants
         :param filepath: file path of the matrix. Ignored when complex_id is specified (default: None).
-        :param desired_shape: desired shape of the matrix. Ensures the matrix ligand and receptor didn't switch places.
         :return: raptorx matrix
         """
+        desired_shape = (len(res_complex.receptor_sequence), len(res_complex.ligand_sequence))
         # convert complex_id to file path
-        if complex_id is not None:
-            dirpath = get_raptorx_dir_path(complex_id)
+        if filepath is None:
+            dirpath = get_raptorx_dir_path(res_complex.complex_id)
             matrix_file_extension = '.gcnn_inter'
             filepath_list = [file_name for file_name in os.listdir(dirpath) if
                              file_name.endswith(matrix_file_extension)]
@@ -106,43 +132,14 @@ class RaptorxReranker(Reranker):
         elif method == RaptorXScoringMethod.norm:
             return np.linalg.norm(neighbour_scores)
 
-    def rerank(self, complexes, detailed_return=False):
-        # type: (self, List[complex.Complex]) -> Union[List[complex.Complex], List[complex.Complex, int, float]]
-        """
-        Reranks a list of Complexes by raptorx matrix and given scoring parameters.
-        :param complexes: list of complexes to rerank
-        :param detailed_return: returns a more detailed list with the score of each complex
-        :return: reordered list by the score calculated using the conf params given in init
-        """
-        if not isinstance(complexes, list):
-            raise TypeError("complexes argument must by of list type")
-        if len(complexes) < 1:
-            raise ValueError("List of complexes must contain at least one complex")
-        comp = complexes[0]
-        complex_id = comp.complex_id
-        # Get raptorx matrix using the first complex data
-        receptor_len = len(comp.receptor_sequence)
-        ligand_len = len(comp.ligand_sequence)
-        rapt_mat = RaptorxReranker.get_raptorx_matrix(complex_id, desired_shape=(receptor_len, ligand_len))
-        # Give each complex it's score
-        ranks = []
-        for i, res_complex in enumerate(complexes):
-            neighbours = res_complex.get_neighbours_residues()
-            score = float(RaptorxReranker.get_raptorx_score(rapt_mat, neighbours, self.scoring_method, self.prob_trim,
-                                                            self._method_arg))
-            ranks.append((i, score))
-        ranks = sorted(ranks, key=lambda rank: rank[1], reverse=True)
-        if detailed_return:
-            return [(complexes[i], i, score) for i, score in ranks]
-        return [complexes[i] for i, score in ranks]
-
-
+'''
 # NOTE! complexes must be a subset of ACCEPTED_COMPLEXES
 class SvmRegressionReranker(Reranker):
 
     # alternative args:
     # training_data_file_name=ACCEPTED_COMPLEXES, training_data_complex_ids=TRAIN_FEATURES_AND_LABELS_PICKLE_8
-    def __init__(self, use_raptor=True, training_data_file_name=TOP_RAPTOR_CORRELATION_PICKLE, training_data_complex_ids=TOP_RAPTOR_CORRELATION_IDS):
+    def __init__(self, use_raptor=True, training_data_file_name=TOP_RAPTOR_CORRELATION_PICKLE,
+                 training_data_complex_ids=TOP_RAPTOR_CORRELATION_IDS):
         self._training_data_file_name = training_data_file_name
         self._training_data_complex_ids = training_data_complex_ids
         self._use_raptor = use_raptor
@@ -155,7 +152,6 @@ class SvmRegressionReranker(Reranker):
 
         self._train_classifier(complex_ids, use_raptor=self._use_raptor)
         self._train_regressor(complex_ids, use_raptor=self._use_raptor)
-
 
         features = [[get_patch_dock_complex_features(c, include_raptor_score=self._use_raptor)] for c in complexes]
         print("feature len", len(features[0][0]))
@@ -172,24 +168,28 @@ class SvmRegressionReranker(Reranker):
         return X[p], y[p]
 
     def _train_classifier(self, complex_ids, use_raptor=True):
-        X_train, y_train, X_test, y_test = self._get_train_test_data(complex_ids, binary_labels=True, use_raptor=use_raptor)
+        X_train, y_train, X_test, y_test = self._get_train_test_data(complex_ids, binary_labels=True,
+                                                                     use_raptor=use_raptor)
         self._classifier.fit(X_train, y_train)
 
     def _train_regressor(self, complex_ids, use_raptor=True):
-        X_train, y_train, X_test, y_test = self._get_train_test_data(complex_ids, binary_labels=False, use_raptor=use_raptor)
+        X_train, y_train, X_test, y_test = self._get_train_test_data(complex_ids, binary_labels=False,
+                                                                     use_raptor=use_raptor)
         self._regressor.fit(X_train, y_train)
         # print("regressor params:", self._regressor._regressor.coef_)
 
-    def _get_train_test_data(self, complex_ids, binary_labels=True, use_raptor=True):        
+    def _get_train_test_data(self, complex_ids, binary_labels=True, use_raptor=True):
         if binary_labels:
-            X,y = load_features_and_binary_labels(file_name=self._training_data_file_name)
+            X, y = load_features_and_binary_labels(file_name=self._training_data_file_name)
         else:
-            X,y = load_features_and_continuous_labels(non_zero_data_only=False, file_name=self._training_data_file_name)
+            X, y = load_features_and_continuous_labels(non_zero_data_only=False,
+                                                       file_name=self._training_data_file_name)
 
         if not use_raptor:
             X = self._remove_raptor_components(X)
 
-        can_train_on = np.repeat(~np.isin(self._training_data_complex_ids, complex_ids), NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX)
+        can_train_on = np.repeat(~np.isin(self._training_data_complex_ids, complex_ids),
+                                 NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX)
         X_train, y_train = self._unison_shuffle(X[can_train_on], y[can_train_on])
         X_test, y_test = self._unison_shuffle(X[~can_train_on], y[~can_train_on])
 
@@ -198,6 +198,7 @@ class SvmRegressionReranker(Reranker):
             X_train, y_train = X_train[has_positive_target], y_train[has_positive_target]
 
         return X_train, y_train, X_test, y_test
-    
+
     def _remove_raptor_components(self, X):
         return X[:, :N_PATCH_DOCK_SCORE_COMPONENTS]
+'''

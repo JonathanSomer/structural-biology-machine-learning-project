@@ -7,7 +7,6 @@ from enum import Enum
 
 from Constants import *
 
-NEIGHBOR_DEFAULT_RADIUS = 5
 LIGAND_STRUCT_ID = 'ligand'
 RECEPTOR_STRUCT_ID = 'receptor'
 N_PATCH_DOCK_SCORE_COMPONENTS = 4
@@ -24,9 +23,6 @@ class ComplexType(Enum):
 class Complex(object):
     __metaclass__ = ABCMeta
 
-    NEIGHBOUR_ATTR_TEMPLATE = '_neighbours%d'
-    NEIGHBOR_RADII = [5, 8]
-
     def __init__(self, complex_id, reprocess=False):
         self._complex_id = complex_id
         self._neighbours = None
@@ -37,7 +33,7 @@ class Complex(object):
         for k in data.keys():
             if k.startswith('nb'):
                 radius = int(k[2:])
-                setattr(self, self.NEIGHBOUR_ATTR_TEMPLATE % radius, data[k])
+                setattr(self, NEIGHBOUR_ATTR_TEMPLATE % radius, data[k])
 
     @property
     def complex_id(self):
@@ -63,7 +59,7 @@ class Complex(object):
     def ligand_sequence(self):
         return self._ligand_sequence
 
-    def get_neighbours_residues(self, neighbor_radius=NEIGHBOR_DEFAULT_RADIUS):
+    def get_neighbours_residues(self, neighbor_radius=NEIGHBOUR_DEFAULT_RADIUS):
         # type: () -> List[Tuple[int, int]]
         """
         :return: list of tuples (receptor_residue_index, ligand_residue_index) in which the euclidean distance
@@ -92,10 +88,10 @@ class Complex(object):
                 residue.true_index = true_index
                 true_index += 1
 
-        if neighbor_radius not in self.NEIGHBOR_RADII:
+        if neighbor_radius not in NEIGHBOUR_RADII:
             raise ValueError("radius value is invalid")
 
-        neighbour_attr = self.NEIGHBOUR_ATTR_TEMPLATE % neighbor_radius
+        neighbour_attr = NEIGHBOUR_ATTR_TEMPLATE % neighbor_radius
         if hasattr(self, neighbour_attr) and getattr(self, neighbour_attr) is not None:
             return getattr(self, neighbour_attr)
 
@@ -202,7 +198,8 @@ class BenchmarkComplex(Complex):
         bound = self.type == ComplexType.zdock_benchmark_bound
         return get_zdock_benchmark_processed_data_path(self.complex_id, bound)
 
-
+"""
+LEGACY CODE
 class PatchDockComplex(Complex):
 
     def __init__(self, complex_id, rank, reprocess=False):
@@ -238,3 +235,4 @@ class PatchDockComplex(Complex):
     @property
     def score_components(self):
         return self._score_components
+"""

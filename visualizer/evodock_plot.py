@@ -151,7 +151,7 @@ def plot_max_patchdock_fnat_scores(result_helper, top=None):
     plt.show()
 
 
-def plot_fnat_of_unbound(ids=TRAIN_COMPLEX_IDS):
+def plot_fnat_of_unbound(ids):
     unbounds = [BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_unbound)
                 for complex_id in ids]
     bounds = [BenchmarkComplex(complex_id, type=ComplexType.zdock_benchmark_bound)
