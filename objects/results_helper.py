@@ -8,7 +8,7 @@ from objects.processed_result import ComplexProcessedResult
 class ResultsHelper(object):
 
     def __init__(self, complex_ids, n_of_patchdock_results, reranker,
-                 ignore_failure=False, verbose=True, recache=False):
+                 ignore_failure=False, verbose=True):
         self.n_of_patchdock_results = n_of_patchdock_results
         self.reranker = reranker
         self.complex_helpers = {}
@@ -16,28 +16,31 @@ class ResultsHelper(object):
             if verbose:
                 print("ResultHelper Loading complex_id: %s" % c_id)
             try:
-                self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker,
-                                                           recache)
+                self.complex_helpers[c_id] = ComplexHelper(c_id, self.n_of_patchdock_results, self.reranker)
             except Exception as e:
-                if verbose:
-                    print("%s: %s" % (c_id, str(e)))
+                print("%s: %s" % (c_id, str(e)))
                 if not ignore_failure:
                     raise
         self.complex_ids = list(self.complex_helpers.keys())
 
-    def get_all_capri_scores_of_original_patchdock_ranking(self):
-        return np.array([self.get_capri_score_of_original_patchdock_ranking(complex_id)
+    def get_all_capri_scores(self, after):
+        # type: (bool) -> np.array
+        """
+        Gets the capri score before or after reranking (depending on after argument) for all complexes.
+        :param after: Should order the scores by the reranking order or the original order
+        :return: np.array of capri scores
+        """
+        return np.array([self.get_capri_score(complex_id, after)
                          for complex_id in self.complex_ids])
 
-    def get_capri_score_of_original_patchdock_ranking(self, complex_id):
-        return self.complex_helpers[complex_id].get_capri_score_of_original_patchdock_ranking()
-
-    def get_all_capri_scores_of_reranking(self):
-        return np.array([self.get_capri_score_of_reranking(complex_id)
-                         for complex_id in self.complex_ids])
-
-    def get_capri_score_of_reranking(self, complex_id):
-        return self.complex_helpers[complex_id].get_capri_score_of_reranking()
+    def get_capri_score(self, complex_id, after):
+        # type: (str, bool) -> int
+        """
+        Gets the capri score before or after reranking (depending on after argument) for the given complex.
+        :param after: Should order the scores by the reranking order or the original order
+        :return: int of capri score
+        """
+        return self.complex_helpers[complex_id].get_capri_score(after)
 
     def get_all_fnat_scores(self, after, top=None, bound=True):
         # type: (bool, Union[int, None]) -> np.ndarray
@@ -63,11 +66,10 @@ class ResultsHelper(object):
 
 class ComplexHelper(object):
 
-    def __init__(self, complex_id, n_of_patchdock_results, reranker, recache=False):
+    def __init__(self, complex_id, n_of_patchdock_results, reranker):
         self.complex_id = complex_id
         self.n_of_patchdock_results = n_of_patchdock_results
         self.reranker = reranker
-        self.recache = recache
         self.receptor_sequence = self.get_sequence_from_fasta(ligand=False)
         self.ligand_sequence = self.get_sequence_from_fasta(ligand=True)
         self.original_ranked_complexes = self._get_patchdock_results()
@@ -86,17 +88,10 @@ class ComplexHelper(object):
             next(f)
             return f.readline()
 
-    def get_capri_score_of_original_patchdock_ranking(self):
-        return self.get_capri_score(False)
-
-    def get_capri_score_of_reranking(self):
-        return self.get_capri_score(True)
-
     def get_capri_score(self, after):
         complexes = self.reranked_complexes if after else self.original_ranked_complexes
         top_10 = complexes[:10]
-        x= sum([capri_utils.convert_fnat_to_capri(comp.get_fnat_score()) for comp in top_10])
-        return x
+        return sum([capri_utils.convert_fnat_to_capri(comp.get_fnat_score()) for comp in top_10])
 
     def get_fnat_scores(self, after, top=None, bound=True):
         complexes = self.reranked_complexes if after else self.original_ranked_complexes
