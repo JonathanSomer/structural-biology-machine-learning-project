@@ -1,13 +1,13 @@
 from Constants import *
 from Reranker.reranker import RaptorxReranker, RaptorXScoringMethod
-from objects.results_helper import ResultsHelper
+from objects.results_helper import ResultsHelper, ComplexHelper
 from visualizer import evodock_plot as plot
 # from Reranker.regression_model import *
 
 
-complex_ids = os.listdir(BASE_DATA_PATH)
+complex_ids = get_all_training_complexes()
 n_of_patchdock_results = 1000
-reranker = RaptorxReranker(scoring_method=RaptorXScoringMethod.sqrt_sum, prob_trim=0.01)
+reranker = RaptorxReranker(scoring_method=RaptorXScoringMethod.sqrt_sum, prob_trim=0.01, percentile_trim=0.8)
 
 helper = ResultsHelper(complex_ids, n_of_patchdock_results, reranker, ignore_failure=True, verbose=False)
 

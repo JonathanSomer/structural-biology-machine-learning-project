@@ -13,7 +13,6 @@ class RaptorXScoringMethod(Enum):
     """
     log_likelihood = "sum of log likelihood"  # sum of log probablities
     likelihood = "sum of likelihood"  # multiply probabilities
-    percentage = "cutoff by percentile"  # cutoff percentage
     sqrt_sum = "sum of sqrt"
     cbrt_sum = "sum of cube"
     norm = "norm"  # euclidean distance
@@ -29,13 +28,14 @@ class Reranker(object):
 
 class RaptorxReranker(Reranker):
 
-    def __init__(self, scoring_method, prob_trim=0.2, method_arg=None):
+    def __init__(self, scoring_method, prob_trim=0.1, percentile_trim=0.8, method_arg=None):
         """
         :param scoring_method: See utils.raptorx_utils.get_raptorx_score for details
         :param prob_trim: See utils.raptorx_utils.get_raptorx_score for details
         """
         self.scoring_method = scoring_method
         self.prob_trim = prob_trim
+        self.percentile_trim = percentile_trim
         self._method_arg = method_arg
 
     def rerank(self, complexes, raptorx_matrix=None, detailed_return=False):
@@ -57,8 +57,7 @@ class RaptorxReranker(Reranker):
         ranks = []
         for i, res_complex in enumerate(complexes):
             neighbours = res_complex.get_neighbours_residues()
-            score = float(RaptorxReranker.get_raptorx_score(raptorx_matrix, neighbours, self.scoring_method,
-                                                            self.prob_trim, self._method_arg))
+            score = float(self.get_raptorx_score(raptorx_matrix, neighbours))
             ranks.append((i, score))
         ranks = sorted(ranks, key=lambda rank: rank[1], reverse=True)
         if detailed_return:
@@ -100,8 +99,7 @@ class RaptorxReranker(Reranker):
                                  % (raptorx_mat.shape, desired_shape))
         return raptorx_mat
 
-    @staticmethod
-    def get_raptorx_score(raptorx_mat, neighbour_indices, method, trim, arg):
+    def get_raptorx_score(self, raptorx_mat, neighbour_indices):
         # type: (np.ndarray, Iterable[Tuple[int, int]], RaptorXScoringMethod, float) -> float
         """
         Returns score based on raptorx matrix with the given score method.
@@ -113,20 +111,21 @@ class RaptorxReranker(Reranker):
         """
         # assert method not in RaptorXScoringMethod.__members__, "method is not in RaptorXScoringMethod enum"
         # get new ndarray by list of incides
+        method = self.scoring_method
         neighbour_scores = raptorx_mat[tuple(zip(*neighbour_indices))]
-        # trim results
-        neighbour_scores = neighbour_scores[neighbour_scores >= trim]
+        # trim results by probability and percentile
+        neighbour_scores = neighbour_scores[neighbour_scores >= self.prob_trim]
+        if neighbour_scores.size > 0:
+            rapt_percentile = np.quantile(neighbour_scores, self.percentile_trim)
+            neighbour_scores = neighbour_scores[neighbour_scores >= rapt_percentile]
+
         if method == RaptorXScoringMethod.log_likelihood:
             return np.sum(np.log(neighbour_scores))
         elif method == RaptorXScoringMethod.likelihood:
             return np.prod(neighbour_scores)
-        elif method == RaptorXScoringMethod.percentage:
-            cutoff_value = np.percentile(raptorx_mat.flatten(), arg)
-            return len(neighbour_scores[neighbour_scores >= cutoff_value])
         elif method == RaptorXScoringMethod.sqrt_sum:
             return np.sum(np.sqrt(neighbour_scores))
         elif method == RaptorXScoringMethod.cbrt_sum:
             return np.sum(np.cbrt(neighbour_scores))
         elif method == RaptorXScoringMethod.norm:
             return np.linalg.norm(neighbour_scores)
-
