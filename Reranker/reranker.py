@@ -116,7 +116,7 @@ class RaptorxReranker(Reranker):
         # trim results by probability and percentile
         neighbour_scores = neighbour_scores[neighbour_scores >= self.prob_trim]
         if neighbour_scores.size > 0:
-            rapt_percentile = np.quantile(neighbour_scores, self.percentile_trim)
+            rapt_percentile = np.percentile(neighbour_scores, 100 * self.percentile_trim)
             neighbour_scores = neighbour_scores[neighbour_scores >= rapt_percentile]
 
         if method == RaptorXScoringMethod.log_likelihood:
