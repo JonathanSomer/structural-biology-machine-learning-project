@@ -16,6 +16,7 @@ class RaptorXScoringMethod(Enum):
     sqrt_sum = "sum of sqrt"
     cbrt_sum = "sum of cube"
     norm = "norm"  # euclidean distance
+    average = "average"
 
 
 class Reranker(object):
@@ -129,3 +130,5 @@ class RaptorxReranker(Reranker):
             return np.sum(np.cbrt(neighbour_scores))
         elif method == RaptorXScoringMethod.norm:
             return np.linalg.norm(neighbour_scores)
+        elif method == RaptorXScoringMethod.average:
+            return 0.0 if neighbour_scores.size == 0 else np.average(neighbour_scores)
