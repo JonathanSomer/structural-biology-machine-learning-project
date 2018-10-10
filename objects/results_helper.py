@@ -22,24 +22,24 @@ class ResultsHelper(object):
                     raise
         self.complex_ids = list(self.complex_helpers.keys())
 
-    def get_all_capri_scores(self, after):
+    def get_all_capri_scores(self, after, top=10):
         # type: (bool) -> np.array
         """
         Gets the capri score before or after reranking (depending on after argument) for all complexes.
         :param after: Should order the scores by the reranking order or the original order
         :return: np.array of capri scores
         """
-        return np.array([self.get_capri_score(complex_id, after)
+        return np.array([self.get_capri_score(complex_id, after, top)
                          for complex_id in self.complex_ids])
 
-    def get_capri_score(self, complex_id, after):
+    def get_capri_score(self, complex_id, after, top=10):
         # type: (str, bool) -> int
         """
         Gets the capri score before or after reranking (depending on after argument) for the given complex.
         :param after: Should order the scores by the reranking order or the original order
         :return: int of capri score
         """
-        return self.complex_helpers[complex_id].get_capri_score(after)
+        return self.complex_helpers[complex_id].get_capri_score(after, top)
 
     def get_all_fnat_scores(self, after, top=None):
         # type: (bool, Union[int, None]) -> np.ndarray
@@ -88,10 +88,10 @@ class ComplexHelper(object):
         with open(get_complex_fasta_path(self.complex_id, ligand)) as f:
             return f.readlines()[1]
 
-    def get_capri_score(self, after):
+    def get_capri_score(self, after, top):
         complexes = self.reranked_complexes if after else self.original_ranked_complexes
-        top_10 = complexes[:10]
-        return sum([capri_utils.convert_fnat_to_capri(comp.get_fnat_score()) for comp in top_10])
+        top_res = complexes[:top]
+        return sum([capri_utils.convert_fnat_to_capri(comp.get_fnat_score()) for comp in top_res])
 
     def get_fnat_scores(self, after, top=None):
         complexes = self.reranked_complexes if after else self.original_ranked_complexes

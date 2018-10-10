@@ -3,9 +3,9 @@ from utils.fnat_utils import get_fnat_score
 
 
 class CapriAcceptanceLevelScores(Enum):
-    High = 1000
-    Medium = 100
-    Acceptable = 10
+    High = 1000000000
+    Medium = 1000000
+    Acceptable = 1000
     Incorrect = 1
 
 

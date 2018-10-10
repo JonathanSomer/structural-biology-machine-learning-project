@@ -132,3 +132,6 @@ class RaptorxReranker(Reranker):
             return np.linalg.norm(neighbour_scores)
         elif method == RaptorXScoringMethod.average:
             return 0.0 if neighbour_scores.size == 0 else np.average(neighbour_scores)
+
+    def __str__(self):
+        return "RaptorxReranker-method:{}".format(self.scoring_method.name)
