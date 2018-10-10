@@ -3,6 +3,7 @@ from utils import fnat_utils, capri_utils, raptorx_utils
 from utils.fnat_utils import get_fnat_score
 import numpy as np
 import scipy.stats as stats
+import math
 
 from objects.complex import BenchmarkComplex, ComplexType
 from objects import complex as cmp
@@ -244,7 +245,7 @@ def plot_improved_percentage(result_helper, top=[10]):
     plt.show()
 
 
-def _plot_func_per_fnat_thresholds_before_vs_after(result_helper, func, top=10):
+def _plot_func_per_fnat_thresholds_before_vs_after(result_helper, func, ylabel, top):
     # type: (ResultsHelper, Callable[[np.ndarray, capri_utils.FnatThresholds], float], List[int]) -> None
     """
     Plot a barplot with func values of before vs after per fnat threshold
@@ -263,32 +264,35 @@ def _plot_func_per_fnat_thresholds_before_vs_after(result_helper, func, top=10):
             plt.text(rect.get_x() + rect.get_width() / 2., height + 0.1, "{:.2f}".format(height), ha='center',
                      va='bottom')
 
-    # if isinstance(top, int):
-    #    top = [top]
     thresholds = list(capri_utils.FnatThresholds)
     width = 1 / 3
     x = [t.name for t in thresholds]
     ids = np.arange(len(x))
+    for i, t in enumerate(top):
+        if len(top) > 1:
+            plt.subplot(2, math.ceil(len(top) / 2), i + 1)
+        original_fnats = result_helper.get_all_fnat_scores(after=False, top=t)
+        rerank_fnats = result_helper.get_all_fnat_scores(after=True, top=t)
+        y_before, y_after = [], []
+        for i, threshold in enumerate(thresholds):
+            # update y
+            t_val = threshold.value
+            y_before.append(func(original_fnats, t_val))
+            y_after.append(func(rerank_fnats, t_val))
 
-    original_fnats = result_helper.get_all_fnat_scores(after=False, top=top)
-    rerank_fnats = result_helper.get_all_fnat_scores(after=True, top=top)
-    y_before, y_after = [], []
-    for i, threshold in enumerate(thresholds):
-        # update y
-        t_val = threshold.value
-        y_before.append(func(original_fnats, t_val))
-        y_after.append(func(rerank_fnats, t_val))
+        # plot x and y in bar plot
+        rects1 = plt.bar(ids - 0.5 * width, y_before, width=width, label="original ranking top {}".format(t))
+        rects2 = plt.bar(ids + 0.5 * width, y_after, width=width, label="{} top {}".format(result_helper.reranker, t))
+        autolabel(rects1)
+        autolabel(rects2)
 
-    # plot x and y in bar plot
-    rects1 = plt.bar(ids - 0.5 * width, y_before, width=width, label="original ranking top {}".format(top))
-    rects2 = plt.bar(ids + 0.5 * width, y_after, width=width, label="{} top {}".format(result_helper.reranker, top))
-    autolabel(rects1)
-    autolabel(rects2)
-    plt.xticks(ids, x)
-    plt.legend()
+        plt.xlabel("before vs after reranking per threshold")
+        plt.ylabel(ylabel)
+        plt.xticks(ids, x)
+        plt.legend()
 
 
-def plot_at_least_one_percentage_per_fnat_thresholds_before_vs_after(result_helper, top=10):
+def plot_at_least_one_percentage_per_fnat_thresholds_before_vs_after(result_helper, top=[10]):
     # type: (ResultsHelper, int) -> None
     """
     Plot a barplot with percentage of complexes with at least one result above each threshold
@@ -301,8 +305,9 @@ def plot_at_least_one_percentage_per_fnat_thresholds_before_vs_after(result_help
         complex_num = fnats.shape[0]
         return 100 * np.sum(np.any(fnats >= threshold, axis=1)) / complex_num
 
-    _plot_func_per_fnat_thresholds_before_vs_after(result_helper, at_least_one_percentage, top)
-    plt.title("Reranking impact per top results")
-    plt.xlabel("reranking impact")
-    plt.ylabel("percentage")
+    if isinstance(top, int):
+        top = [top]
+
+    _plot_func_per_fnat_thresholds_before_vs_after(result_helper, at_least_one_percentage, ylabel="percentage", top=top)
+    plt.suptitle("Reranking percentage of cover of at least one result per fnat threshold")
     plt.show()
