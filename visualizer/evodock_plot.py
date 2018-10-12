@@ -199,7 +199,7 @@ def raptor_to_fnat_plot_per_complex(result_helper):
     plt.show()
 
 
-def plot_improved_percentage(result_helper, top=[10]):
+def plot_improved_capri_percentage(result_helper, top=[10]):
     # type: (ResultsHelper, List[int]) -> None
     """
     Plot a barplot with percentage of improvement in result reranking over all complexes
@@ -238,6 +238,58 @@ def plot_improved_percentage(result_helper, top=[10]):
         rects = plt.bar(ids + (i + 0.5 - len(top) / 2) * width, y, width=width, label="top {}".format(t))
         autolabel(rects)
     plt.title("Reranking impact per top results")
+    plt.xlabel("reranking impact")
+    plt.xticks(ids, x)
+    plt.ylabel("percentage")
+    plt.legend()
+    plt.show()
+
+
+def plot_improved_fnat_category_percentage(result_helper, top=10):
+    # type: (ResultsHelper, List[int]) -> None
+    """
+    Plot a barplot with percentage of improvement in result reranking over all complexes
+    :param result_helper: helper for computing results
+    :param top: the amount of results to add to the calculation per complex
+    :return: None
+    """
+
+    def autolabel(rects):
+        """
+        Attach a text label above each bar displaying its height
+        """
+        for rect in rects:
+            height = rect.get_height()
+            plt.text(rect.get_x() + rect.get_width() / 2., height + 0.1, "{:.2f}".format(height), ha='center',
+                     va='bottom')
+
+    # if isinstance(top, int):
+    #    top = [top]
+
+    thresholds = list(capri_utils.FnatThresholds)
+    width = 1 / (len(thresholds) + 1)
+    x = ['better', 'worse']
+    ids = np.arange(len(x))
+    for i, t in enumerate(thresholds):
+        fnat_before = result_helper.get_all_fnat_scores(after=False, top=top)
+        fnat_after = result_helper.get_all_fnat_scores(after=True, top=top)
+        total_comps = fnat_before.shape[0]
+
+        # get y
+        def fnat1_passed_and_fnat2_did_not(fnat1, fnat2):
+            pass_threshold_fnat1 = np.any(fnat1 >= t.value, axis=1)  # at least one result passed the threshold
+            not_pass_threshold_fnat2 = np.all(fnat2 < t.value, axis=1)  # all results didn't pass the threshold
+            pass_threshold_fnat1_not_fnat2 = np.logical_and(pass_threshold_fnat1, not_pass_threshold_fnat2)
+            return 100 * np.sum(pass_threshold_fnat1_not_fnat2) / total_comps  # return percentage
+
+        y = np.array([fnat1_passed_and_fnat2_did_not(fnat_after, fnat_before),
+                      fnat1_passed_and_fnat2_did_not(fnat_before, fnat_after)])
+
+        # plot x and y in bar plot
+        rects = plt.bar(ids + (i + 0.5 - len(ids) / 2) * width, y, width=width,
+                        label="top {} threshold {}".format(top, t.name))
+        autolabel(rects)
+    plt.title("Reranking moving to a new fnat category")
     plt.xlabel("reranking impact")
     plt.xticks(ids, x)
     plt.ylabel("percentage")

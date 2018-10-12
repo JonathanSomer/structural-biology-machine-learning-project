@@ -14,7 +14,9 @@ class RaptorXScoringMethod(Enum):
     log_likelihood = "sum of log likelihood"  # sum of log probablities
     likelihood = "sum of likelihood"  # multiply probabilities
     sqrt_sum = "sum of sqrt"
+    sum = "sum"
     cbrt_sum = "sum of cube"
+    power_sum = "sum of {:.2f} power"
     norm = "norm"  # euclidean distance
     average = "average"
     count = "count"  # simply count the number of neighbours
@@ -129,6 +131,10 @@ class RaptorxReranker(Reranker):
             return np.sum(np.sqrt(neighbour_scores))
         elif method == RaptorXScoringMethod.cbrt_sum:
             return np.sum(np.cbrt(neighbour_scores))
+        elif method == RaptorXScoringMethod.sum:
+            return np.sum(neighbour_scores)
+        elif method == RaptorXScoringMethod.power_sum:
+            return np.sum(np.power(neighbour_scores, self._method_arg))
         elif method == RaptorXScoringMethod.norm:
             return np.linalg.norm(neighbour_scores)
         elif method == RaptorXScoringMethod.average:
@@ -137,4 +143,6 @@ class RaptorxReranker(Reranker):
             return raptorx_mat[tuple(zip(*neighbour_indices))].size
 
     def __str__(self):
-        return "RaptorxReranker-method:{}".format(self.scoring_method.value)
+        method = self.scoring_method
+        method_str = method.value.format(self._method_arg) if method == RaptorXScoringMethod.power_sum else method.value
+        return "reranker-method:{}".format(method_str)
