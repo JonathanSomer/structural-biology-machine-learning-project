@@ -124,6 +124,32 @@ def predict_fnat_from_features(complex_features, non_zero_fnat_classifier, fnat_
 		return 0.0
 
 
+def _get_values_in_percentiles_range(arr, low_percentile, upper_percentile, include_upper=False):
+	'''
+	:param arr: array or list of number
+	:param low_percentile: low bound percentile for range
+	:param upper_percentile: upper bound percentile for range
+	:param include_upper: if true upper bound included in range else not included
+	:return: np array of numbers within that range. lower bound always included in range
+	'''
+	arr = np.array(arr)
+	low_percentile_val = np.percentile(arr, low_percentile, 0)
+	upper_percentile_val = np.percentile(arr, upper_percentile, 0)
+	if include_upper:
+		return arr[np.logical_and(arr >= low_percentile_val, arr <= upper_percentile_val)]
+	return arr[np.logical_and(arr >= low_percentile_val, arr < upper_percentile_val)]
+
+def _get_raptor_percentiles_vector(raptor_vals, func=np.sum):
+	'''
+	:param raptor_vals: list of raptor scores of nb of specific result
+	:param func: func to apply over each percentile range
+	:return: array of func result over each of the percentile ranges
+	'''
+	# ranges = [(0, 36, False), (36, 68, False), (68, 84, False), (84, 92, False), (92, 96, False),
+	#          (96, 98, False), (98, 100, True)]
+	ranges = [(0, 38, False), (38, 70, False), (70, 86, False), (86, 94, False), (94, 98, False), (98, 100, True)]
+	return [func(_get_values_in_percentiles_range(raptor_vals, low_percentile, upper_percentile, include_upper))
+			for low_percentile, upper_percentile, include_upper in ranges]
 
 # NOTE! complexes must be a subset of ACCEPTED_COMPLEXES
 class SvmRegressionReranker(Reranker):
