@@ -1,15 +1,18 @@
-from Constants import NEIGHBOUR_RADII, NEIGHBOUR_ATTR_TEMPLATE, NEIGHBOUR_DEFAULT_RADIUS, FNAT_ATTR_TEMPLATE, get_raptorx_dir_path
 from os import listdir, path
 import numpy as np
+from Constants import *
+import re
+import json
 
 class ComplexProcessedResult(object):
 
-    def __init__(self, complex_id, receptor_sequence, ligand_sequence, attr_dict,
+    def __init__(self, complex_id, receptor_sequence, ligand_sequence, attr_dict, original_rank,
                  neighbor_radius=NEIGHBOUR_DEFAULT_RADIUS):
         self.__dict__ = {"_" + k: v for k, v in attr_dict.items()}
         self._complex_id = complex_id
         self._receptor_sequence = receptor_sequence
         self._ligand_sequence = ligand_sequence
+        self._original_rank = original_rank
         if neighbor_radius not in NEIGHBOUR_RADII:
             raise ValueError("radius value is invalid")
         self.neighbor_radius = neighbor_radius
@@ -25,6 +28,10 @@ class ComplexProcessedResult(object):
     @property
     def ligand_sequence(self):
         return self._ligand_sequence
+
+    @property
+    def original_rank(self):
+        return self._original_rank
 
     def get_neighbours_residues(self):
         # type: () -> List[Tuple[int, int]]
@@ -43,6 +50,15 @@ class ComplexProcessedResult(object):
         :return: fnat score
         """
         return self._get_attr_by_template(FNAT_ATTR_TEMPLATE)
+
+    def get_patch_dock_score_components(self):
+        with open(get_patchdock_complex_score_json_file_path(self.complex_id), "r") as f:
+            map_rank_to_score_components = json.load(f)
+
+        return map_rank_to_score_components[str(self.original_rank)]
+
+    def get_patch_dock_score(self):
+        return self.get_patch_dock_score_components()[:1]
 
     def _get_attr_by_template(self, attr_template):
         rad_attr = attr_template % self.neighbor_radius
