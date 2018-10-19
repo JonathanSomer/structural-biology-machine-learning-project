@@ -93,4 +93,10 @@ class ComplexProcessedResult(object):
         return [func(sorted_nb_values[group_slice])
                 for group_slice in group_slices] + [len(sorted_nb_values)]
 
-
+    def get_raptor_score(self, prob_trim=0.01, percentile_trim=0.8):
+        neighbour_scores = self.get_nb_raptor_values()
+        neighbour_scores = neighbour_scores[neighbour_scores >= prob_trim]
+        if neighbour_scores.size > 0:
+            rapt_percentile = np.percentile(neighbour_scores, int(100 * percentile_trim))
+            neighbour_scores = neighbour_scores[neighbour_scores >= rapt_percentile]
+        return np.sum(np.sqrt(neighbour_scores))
