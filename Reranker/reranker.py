@@ -69,7 +69,7 @@ class RaptorxReranker(Reranker):
         return [complexes[i] for i, score in ranks]
 
     @staticmethod
-    def get_raptorx_matrix(res_complex, filepath=None):
+    def get_raptorx_matrix(res_complex, filepath=None, shuffle_mat=False):
         # type: (ComplexProcessedResult, str, bool) -> np.ndarray
         """
         Returns an numpy 2D ndarray of the score raptorx matrix with the given arguments.
@@ -79,6 +79,7 @@ class RaptorxReranker(Reranker):
         :param filepath: file path of the matrix. Ignored when complex_id is specified (default: None).
         :return: raptorx matrix
         """
+
         desired_shape = (len(res_complex.receptor_sequence), len(res_complex.ligand_sequence))
         # convert complex_id to file path
         if filepath is None:
@@ -101,6 +102,12 @@ class RaptorxReranker(Reranker):
             else:
                 raise IndexError("File matrix shape %s and desired shape %s doesn't match"
                                  % (raptorx_mat.shape, desired_shape))
+
+        if shuffle_mat:
+            shape = raptorx_mat.shape
+            raptorx_mat = raptorx_mat.flatten()
+            np.random.shuffle(raptorx_mat)
+            raptorx_mat = np.reshape(raptorx_mat, shape)
         return raptorx_mat
 
     def get_raptorx_score(self, raptorx_mat, neighbour_indices):

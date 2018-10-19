@@ -80,30 +80,17 @@ class ComplexProcessedResult(object):
                                  % (raptorx_mat.shape, desired_shape))
         return raptorx_mat
 
-    def _get_values_in_percentiles_range(self, arr, low_percentile, upper_percentile, include_upper=False):
+    def get_nb_raptor_values(self):
+        return self._get_raptorx_matrix()[tuple(zip(*self.get_neighbours_residues()))]
+
+    def get_raptor_grouped_values_vector(self, func=np.sum):
         '''
-        :param arr: array or list of number
-        :param low_percentile: low bound percentile for range
-        :param upper_percentile: upper bound percentile for range
-        :param include_upper: if true upper bound included in range else not included
-        :return: np array of numbers within that range. lower bound always included in range
+        :param func: func to apply over each grouped raptor values
+        :return: array of func result over each of the grouped raptor nb values
         '''
-        arr = np.array(arr)
-        low_percentile_val = np.percentile(arr, low_percentile, 0)
-        upper_percentile_val = np.percentile(arr, upper_percentile, 0)
-        if include_upper:
-            return arr[np.logical_and(arr >= low_percentile_val, arr <= upper_percentile_val)]
-        return arr[np.logical_and(arr >= low_percentile_val, arr < upper_percentile_val)]
+        group_slices = [slice(0, 2), slice(2, 6), slice(6, 14), slice(14, 30), slice(30, 62), slice(62, 1000)]
+        sorted_nb_values = sorted(self.get_nb_raptor_values(), reverse=True)
+        return [func(sorted_nb_values[group_slice])
+                for group_slice in group_slices] + [len(sorted_nb_values)]
 
 
-    def get_raptor_percentiles_vector(self, func=np.sum):
-        '''
-        :param func: func to apply over each percentile range
-        :return: array of func result over each of the raptor nb values of percentile ranges
-        '''
-        # ranges = [(0, 36, False), (36, 68, False), (68, 84, False), (84, 92, False), (92, 96, False),
-        #          (96, 98, False), (98, 100, True)]
-        ranges = [(0, 38, False), (38, 70, False), (70, 86, False), (86, 94, False), (94, 98, False), (98, 100, True)]
-        raptor_nb_vals = self._get_raptorx_matrix()[tuple(zip(*self.get_neighbours_residues()))]
-        return [func(self._get_values_in_percentiles_range(raptor_nb_vals, low_percentile, upper_percentile, include_upper))
-                for low_percentile, upper_percentile, include_upper in ranges]

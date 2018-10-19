@@ -214,7 +214,7 @@ def plot_improved_capri_percentage(result_helper, top=[10]):
         """
         for rect in rects:
             height = rect.get_height()
-            plt.text(rect.get_x() + rect.get_width() / 2., height + 0.1, "{:.2f}".format(height), ha='center',
+            plt.text(rect.get_x() + rect.get_width() / 2.0, height + 0.1, "{:.2f}".format(height), ha='center',
                      va='bottom')
 
     if isinstance(top, int):
@@ -355,11 +355,33 @@ def plot_at_least_one_percentage_per_fnat_thresholds_before_vs_after(result_help
 
     def at_least_one_percentage(fnats, threshold):
         complex_num = fnats.shape[0]
-        return 100 * np.sum(np.any(fnats >= threshold, axis=1)) / complex_num
+        return 100*np.sum(np.any(fnats>= threshold, axis=1))/complex_num
 
     if isinstance(top, int):
         top = [top]
 
     _plot_func_per_fnat_thresholds_before_vs_after(result_helper, at_least_one_percentage, ylabel="percentage", top=top)
     plt.suptitle("Reranking percentage of cover of at least one result per fnat threshold")
+    plt.show()
+
+
+def plot_avg_capri_per_fnat_thresholds_before_vs_after(result_helper, top=[10]):
+    # type: (ResultsHelper, int) -> None
+    """
+    Plot a barplot with percentage of complexes with at least one result above each threshold
+    :param result_helper: helper for computing results
+    :param top: the amount of results to add to the calculation per complex
+    :return: None
+    """
+
+    def average_capri_score(fnats, threshold):
+        complex_num = fnats.shape[0]
+        fnat_flat = fnats.flatten()
+        return len(fnat_flat[fnat_flat >= threshold])/float(complex_num)
+
+    if isinstance(top, int):
+        top = [top]
+
+    _plot_func_per_fnat_thresholds_before_vs_after(result_helper, average_capri_score, ylabel="avg num of results", top=top)
+    plt.suptitle("Average capri score per fnat threshold")
     plt.show()
