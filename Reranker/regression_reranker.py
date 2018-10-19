@@ -57,17 +57,23 @@ class SvmRegressionReranker(Reranker):
         X = []; y = []
         processed_complexes_generator = ComplexProcessedResultGenerator()
         for complex_id in complex_ids:
+            print("Fetching features for: {}".format(complex_id))
             processed_complexes = processed_complexes_generator.generate(complex_id, NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX)
             for processed_complex in processed_complexes:
-                X.append(self._generate_features_for_processed_complex(processed_complex))
+                try:
+                    features = self._generate_features_for_processed_complex(processed_complex)
+                except:
+                    continue
+                X.append(features)
                 y.append(processed_complex.get_fnat_score())
 
         return self._unison_shuffle(np.array(X), np.array(y))
 
     def _generate_features_for_processed_complex(self, processed_complex):
         features = []
-        features.extend(processed_complex.get_patch_dock_score_components())
-        # TODO : raptor feature
+        # features.extend(processed_complex.get_patch_dock_score_components())
+        features.extend(processed_complex.get_patch_dock_score())
+        features.extend(processed_complex.get_raptor_grouped_values_vector())
         return features
 
     def _predict_fnat_from_features(self, complex_features):

@@ -57,6 +57,9 @@ class ComplexProcessedResult(object):
 
         return map_rank_to_score_components[str(self.original_rank)]
 
+    def get_patch_dock_score(self):
+        return self.get_patch_dock_score_components()[:1]
+
     def _get_attr_by_template(self, attr_template):
         rad_attr = attr_template % self.neighbor_radius
         return getattr(self, rad_attr)
