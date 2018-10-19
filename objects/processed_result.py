@@ -109,7 +109,7 @@ class ComplexProcessedResult(object):
         return [func(sorted_nb_values[group_slice])
                 for group_slice in group_slices] + [len(sorted_nb_values)]
 
-    def get_raptor_score(self, prob_trim=0.01, percentile_trim=0.8):
+    def get_raptor_score(self, prob_trim=0.01, percentile_trim=0.5):
         neighbour_scores = self.get_nb_raptor_values()
         neighbour_scores = neighbour_scores[neighbour_scores >= prob_trim]
         if neighbour_scores.size > 0:

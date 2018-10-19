@@ -8,7 +8,7 @@ from visualizer import evodock_plot as plot
 
 complex_ids = get_all_training_complexes()
 n_of_patchdock_results = 1000
-reranker = RaptorxReranker(scoring_method=RaptorXScoringMethod.sqrt_sum, prob_trim=0.01, percentile_trim=0.8)
+reranker = RaptorxReranker(scoring_method=RaptorXScoringMethod.sqrt_sum, prob_trim=0.01, percentile_trim=0.5)
 
 helper = ResultsHelper(complex_ids, n_of_patchdock_results, reranker, ignore_failure=True, verbose=False)
 plot.plot_improved_fnat_category_percentage(helper)
