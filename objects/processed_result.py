@@ -2,6 +2,7 @@ from os import listdir, path
 import numpy as np
 from Constants import *
 import re
+import json
 
 class ComplexProcessedResult(object):
 
@@ -51,17 +52,10 @@ class ComplexProcessedResult(object):
         return self._get_attr_by_template(FNAT_ATTR_TEMPLATE)
 
     def get_patch_dock_score_components(self):
-        with open(get_patchdock_complex_score_file_path(self.complex_id), "r") as f:
-            for line in f:
-                pattern = re.compile("^\s*" + str(self.original_rank) + "\s\|.+")
-                if pattern.match(line):
-                    components = [x.strip() for x in line.split('|')]
-                    # rank | score | pen.  | Area    | as1   | as2   | as12  | ACE     | hydroph | Energy  |cluster| dist. || Ligand Transformation
-                    indexes = [1, 2, 3, 7]
-                    return [float(components[i]) for i in indexes]
+        with open(get_patchdock_complex_score_json_file_path(self.complex_id), "r") as f:
+            map_rank_to_score_components = json.load(f)
 
-        print("ERROR GETTING PATCH DOCK SCORE COMPONENTS --- NO REGEX MATCH WTF?")
-        return []
+        return map_rank_to_score_components[str(self.original_rank)]
 
     def _get_attr_by_template(self, attr_template):
         rad_attr = attr_template % self.neighbor_radius

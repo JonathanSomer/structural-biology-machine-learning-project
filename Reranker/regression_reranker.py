@@ -15,12 +15,20 @@ NUMBER_OF_TRANSFORMATIONS_PER_COMPLEX = 1000
 
 class SvmRegressionReranker(Reranker):
     def __init__(self, train_complex_ids):
+        print("START SvmRegressionReranker.__init__()")
         self._classifier = NonZeroFnatClassifier()
         self._regressor = FnatRegressor()
 
-        self._train_classifier(train_complex_ids)
-        self._train_regressor(train_complex_ids)
-        print("Finished SvmRegressionReranker __init__")
+        print("fetching training data...")
+        X_train, y_train = self._get_X_train_y_train(train_complex_ids)
+        print("DONE fetching training data!")
+
+        print("Training SVM Classifier")
+        self._train_classifier(X_train, y_train)
+
+        print("Training regressor")
+        self._train_regressor(X_train, y_train)
+        print("END SvmRegressionReranker.__init__()")
 
 
     def rerank(self, complexes, detailed_return=False):
@@ -34,13 +42,11 @@ class SvmRegressionReranker(Reranker):
 
     # PRIVATE METHODS:
 
-    def _train_classifier(self, complex_ids):
-        X, y = self._get_X_train_y_train(complex_ids)
+    def _train_classifier(self, X,y):
         y = ~np.equal(np.array(y), 0.0)
         self._classifier.fit(X, y)
 
-    def _train_regressor(self, complex_ids):
-        X, y = self._get_X_train_y_train(complex_ids)
+    def _train_regressor(self, X, y):
         mask = ~np.equal(y, 0.0)
         X = X[mask]
         y = y[mask]

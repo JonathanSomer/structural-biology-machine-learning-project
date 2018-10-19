@@ -71,6 +71,11 @@ def get_patchdock_complex_score_file_path(complex_id):
     file_name = "{}.patch_dock_output".format(complex_id)
     return os.path.join(base_path, file_name)
 
+def get_patchdock_complex_score_json_file_path(complex_id):
+    base_path = os.path.join(BASE_DATA_PATH, complex_id, "patch_dock")
+    file_name = "{}.patch_dock_output.json".format(complex_id)
+    return os.path.join(base_path, file_name)
+
 
 def get_raptorx_dir_path(complex_id):
     return os.path.join(BASE_DATA_PATH, complex_id, "raptorx_results")
