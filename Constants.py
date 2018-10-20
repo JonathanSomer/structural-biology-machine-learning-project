@@ -112,6 +112,8 @@ def get_all_training_complexes(only_rigid=True):
     else:
         return list(all_train)
 
+def train_test_data_path():
+  return os.path.join(BASE_DATA_PATH, "train_test.json")
 
 """
 LEGACY paths
