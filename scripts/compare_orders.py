@@ -8,7 +8,7 @@ from sklearn.preprocessing import normalize
 
 def main():
 
-	threshold = 0.3
+	threshold = 0.1
 	N_PLOTS = 2
 	with open(train_test_data_path(), "r") as file:
 		data = json.load(file)
@@ -33,7 +33,10 @@ def main():
 	fig = plt.figure()
 	fig.suptitle('Raptor & PatchDock Order Comparison')
 
-	for complex_id in progressbar.progressbar(get_all_training_complexes()):
+	all_complexes = ['2GAF', '2PCC', '1I4D', '1VFB', '1FSK', '1NSN', '1EZU', '3VLB', '1US7', '2I25', '2W9E', '1F34', '1KXP', '1UDI', '2A9K', '1EFN', '4H03', '1KXQ', '2B42', '1KAC', '1ML0', '3LVK', '1GHQ', '3H2V', '2B4J', '2AYO', '1RLB', '1Z0K', '2A5T', '1OC0', '1OYV', '1XU1', '1E6E', '1E96', '1GCQ', '2SNI', '1AVX', '2MTA', '1AK4', '2OUL', '2SIC', '2A1A', '1HIA', '2ABZ', '3P57', '1BVN', '1BVK', '1H9D', '1D6R', '3D5S', '2HLE', '2J0T', '2UUY', '1CLV', '1JTD', '1HE1', '1J2J']
+	all_complexes = get_all_training_complexes()
+
+	for complex_id in progressbar.progressbar(all_complexes):
 		complex_X = np.array(map_complex_id_to_X[complex_id])
 		if len(complex_X) == 0:
 			continue
@@ -52,6 +55,8 @@ def main():
 
 		y_patch = np.greater(y_patch, threshold)
 		if sum(y_patch) ==0 :
+			continue
+		if len(y_patch) != 1000:
 			continue
 		patch_order = np.array([i for i in range(1,1001)])
 		X_patch_neg = patch_order[~y_patch]
