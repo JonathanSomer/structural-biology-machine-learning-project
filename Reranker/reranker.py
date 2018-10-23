@@ -20,6 +20,7 @@ class RaptorXScoringMethod(Enum):
     norm = "norm"  # euclidean distance
     average = "average"
     count = "count"  # simply count the number of neighbours
+    log_len_mul_sum = "log(len(nb lst)*sum(nb raptor scores)"
 
 
 class Reranker(object):
@@ -124,6 +125,7 @@ class RaptorxReranker(Reranker):
         # get new ndarray by list of incides
         method = self.scoring_method
         neighbour_scores = raptorx_mat[tuple(zip(*neighbour_indices))]
+        l = len(neighbour_scores)
         # trim results by probability and percentile
         neighbour_scores = neighbour_scores[neighbour_scores >= self.prob_trim]
         if neighbour_scores.size > 0:
@@ -135,7 +137,7 @@ class RaptorxReranker(Reranker):
         elif method == RaptorXScoringMethod.likelihood:
             return np.prod(neighbour_scores)
         elif method == RaptorXScoringMethod.sqrt_sum:
-            return np.sum(np.sqrt(neighbour_scores))
+            return  np.sum(np.sqrt(neighbour_scores))
         elif method == RaptorXScoringMethod.cbrt_sum:
             return np.sum(np.cbrt(neighbour_scores))
         elif method == RaptorXScoringMethod.sum:
@@ -148,6 +150,8 @@ class RaptorxReranker(Reranker):
             return 0.0 if neighbour_scores.size == 0 else np.average(neighbour_scores)
         elif method == RaptorXScoringMethod.count:  # ignore trims
             return raptorx_mat[tuple(zip(*neighbour_indices))].size
+        elif method == RaptorXScoringMethod.log_len_mul_sum:
+            return np.log(len(neighbour_scores)+1)*np.sum(neighbour_scores)
 
     def __str__(self):
         method = self.scoring_method
