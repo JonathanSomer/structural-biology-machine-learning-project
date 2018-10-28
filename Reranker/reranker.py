@@ -33,15 +33,16 @@ class Reranker(object):
 
 class RaptorxReranker(Reranker):
 
-    def __init__(self, scoring_method, prob_trim=0.1, percentile_trim=0.8, method_arg=None):
+    def __init__(self, scoring_method, prob_trim=0.1, percentile_trim=0.8, method_arg=None, shuffle_raptor_matrix=False):
         """
         :param scoring_method: See utils.raptorx_utils.get_raptorx_score for details
         :param prob_trim: See utils.raptorx_utils.get_raptorx_score for details
         """
-        self.scoring_method = scoring_method
         self.prob_trim = prob_trim
         self.percentile_trim = percentile_trim
         self._method_arg = method_arg
+        self.scoring_method = scoring_method
+        self.shuffle_raptor_matrix= shuffle_raptor_matrix
 
     def rerank(self, complexes, raptorx_matrix=None, detailed_return=False):
         # type: (self, List[complex.Complex]) -> Union[List[complex.Complex], List[complex.Complex, int, float]]
@@ -57,7 +58,7 @@ class RaptorxReranker(Reranker):
             raise ValueError("List of complexes must contain at least one complex")
         comp = complexes[0]
         if raptorx_matrix is None:
-            raptorx_matrix = RaptorxReranker.get_raptorx_matrix(comp)
+            raptorx_matrix = RaptorxReranker.get_raptorx_matrix(comp, shuffle_raptor_matrix=self.shuffle_raptor_matrix)
         # Give each complex it's score
         ranks = []
         for i, res_complex in enumerate(complexes):
@@ -70,7 +71,7 @@ class RaptorxReranker(Reranker):
         return [complexes[i] for i, score in ranks]
 
     @staticmethod
-    def get_raptorx_matrix(res_complex, filepath=None, shuffle_mat=False):
+    def get_raptorx_matrix(res_complex, filepath=None, shuffle_raptor_matrix=False):
         # type: (ComplexProcessedResult, str, bool) -> np.ndarray
         """
         Returns an numpy 2D ndarray of the score raptorx matrix with the given arguments.
@@ -104,7 +105,7 @@ class RaptorxReranker(Reranker):
                 raise IndexError("File matrix shape %s and desired shape %s doesn't match"
                                  % (raptorx_mat.shape, desired_shape))
 
-        if shuffle_mat:
+        if shuffle_raptor_matrix:
             shape = raptorx_mat.shape
             raptorx_mat = raptorx_mat.flatten()
             np.random.shuffle(raptorx_mat)
