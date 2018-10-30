@@ -11,6 +11,17 @@ from objects.results_helper import ResultsHelper
 from Constants import *
 
 
+def autolabel(rects):
+    """
+    Attach a text label above each bar displaying its height
+    """
+    for rect in rects:
+        height = rect.get_height()
+        plt.text(rect.get_x() + rect.get_width() / 2., height + min(0.1, height * 0.05), "{:.2f}".format(height),
+                 ha='center',
+                 va='bottom')
+
+
 def plot_rank_to_fnat(result_helper, accumulate=False):
     # type: (ResultsHelper) -> None
     """
@@ -208,15 +219,6 @@ def plot_improved_capri_percentage(result_helper, top=[10]):
     :return: None
     """
 
-    def autolabel(rects):
-        """
-        Attach a text label above each bar displaying its height
-        """
-        for rect in rects:
-            height = rect.get_height()
-            plt.text(rect.get_x() + rect.get_width() / 2.0, height + 0.1, "{:.2f}".format(height), ha='center',
-                     va='bottom')
-
     if isinstance(top, int):
         top = [top]
 
@@ -253,16 +255,6 @@ def plot_improved_fnat_category_percentage(result_helper, top=10):
     :param top: the amount of results to add to the calculation per complex
     :return: None
     """
-
-    def autolabel(rects):
-        """
-        Attach a text label above each bar displaying its height
-        """
-        for rect in rects:
-            height = rect.get_height()
-            plt.text(rect.get_x() + rect.get_width() / 2., height + 0.1, "{:.2f}".format(height), ha='center',
-                     va='bottom')
-
     # if isinstance(top, int):
     #    top = [top]
 
@@ -306,15 +298,6 @@ def _plot_func_per_fnat_thresholds_before_vs_after(result_helper, func, ylabel, 
     :param top: the amount of results to add to the calculation per complex
     :return: None
     """
-
-    def autolabel(rects):
-        """
-        Attach a text label above each bar displaying its height
-        """
-        for rect in rects:
-            height = rect.get_height()
-            plt.text(rect.get_x() + rect.get_width() / 2., height + 0.1, "{:.2f}".format(height), ha='center',
-                     va='bottom')
 
     thresholds = list(capri_utils.FnatThresholds)
     width = 1 / 3
